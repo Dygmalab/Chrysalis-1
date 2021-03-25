@@ -15,32 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-import { render, fireEvent, cleanup } from "react-testing-library";
-import "jest-dom/extend-expect";
+import React from 'react';
+import { render, fireEvent, cleanup } from 'react-testing-library';
+import 'jest-dom/extend-expect';
 
-import DeviceMenu from "../DeviceMenu";
+import DeviceMenu from '../DeviceMenu';
 
 afterEach(cleanup);
 const mockOpenMenu = jest.fn();
 const device = {
-  urls: { url: "http://www.keyboard.io", name: "Home" },
-  displayName: "Keyboardio Model01"
+  urls: { url: 'http://www.keyboard.io', name: 'Home' },
+  displayName: 'Keyboardio Model01'
 };
 
-test("DeviceMenu renders a button with the proper device name", () => {
+test('DeviceMenu renders a button with the proper device name', () => {
   const { getByText } = render(
     <DeviceMenu openBoardMenu={mockOpenMenu} device={device} />
   );
 
-  expect(getByText("Keyboard: Keyboardio Model01")).toMatchSnapshot();
+  expect(getByText('Keyboard: Keyboardio Model01')).toMatchSnapshot();
 });
 
-test("DeviceMenu button calls openMenu when clicked", () => {
+test('DeviceMenu button calls openMenu when clicked', () => {
   const { getByText } = render(
     <DeviceMenu openBoardMenu={mockOpenMenu} device={device} />
   );
-  fireEvent.click(getByText("Keyboard: Keyboardio Model01"));
+  fireEvent.click(getByText('Keyboard: Keyboardio Model01'));
 
   expect(mockOpenMenu).toHaveBeenCalled();
 });

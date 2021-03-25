@@ -14,24 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from "react";
-import PropTypes from "prop-types";
-import settings from "electron-settings";
+import React from 'react';
+import PropTypes from 'prop-types';
+import settings from 'electron-settings';
 
-import { withStyles } from "@material-ui/core/styles";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
+import { withStyles } from '@material-ui/core/styles';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 
 const styles = () => ({
   root: {
     minWidth: 130,
     maxWidth: 360,
-    textTransform: "uppercase"
+    textTransform: 'uppercase'
   },
   languagesText: {
-    fontSize: "0.875rem",
+    fontSize: '0.875rem',
     fontFamily: "'Source Code Pro', monospace",
-    letterSpacing: "0.02857em",
+    letterSpacing: '0.02857em',
     fontWeight: 500,
     lineHeight: 1.75
   }
@@ -56,9 +56,9 @@ function LanguageItem(props) {
     selected
   } = props;
   const onItemClick = () => {
-    settings.set("keyboard.language", `${language}`);
+    settings.set('keyboard.language', `${language}`);
     scanKeyboard(language);
-    //Callback to change state of chosen language is Editor.js
+    // Callback to change state of chosen language is Editor.js
     onChangeLanguageLayout();
     onClose();
   };
@@ -77,12 +77,9 @@ function LanguageItem(props) {
 }
 
 LanguageItem.propTypes = {
-  classes: PropTypes.object.isRequired,
-  language: PropTypes.any,
   onClose: PropTypes.func.isRequired,
   onChangeLanguageLayout: PropTypes.func.isRequired,
   scanKeyboard: PropTypes.func.isRequired,
-  currentLanguageLayout: PropTypes.string.isRequired
 };
 
 export default withStyles(styles)(LanguageItem);

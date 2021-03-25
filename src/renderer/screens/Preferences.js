@@ -16,31 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
-import Electron from "electron";
+import React from 'react';
+import PropTypes from 'prop-types';
+import Electron from 'electron';
 
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUpIcon from "@material-ui/icons/ArrowDropUp";
-import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import Collapse from "@material-ui/core/Collapse";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Portal from "@material-ui/core/Portal";
-import Switch from "@material-ui/core/Switch";
-import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp';
+import Button from '@material-ui/core/Button';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import Collapse from '@material-ui/core/Collapse';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Portal from '@material-ui/core/Portal';
+import Switch from '@material-ui/core/Switch';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 
+import settings from 'electron-settings';
 import {
   KeyboardSettings,
   AdvancedKeyboardSettings
-} from "./Preferences/KeyboardSettings";
-import ColorSettings from "./Preferences/ColorSettings";
-import i18n from "../i18n";
+} from './Preferences/KeyboardSettings';
+import i18n from '../i18n';
 
-import Focus from "../../api/focus";
-import settings from "electron-settings";
+import Focus from '../api/focus';
 
 const styles = theme => ({
   root: {
@@ -54,53 +53,56 @@ const styles = theme => ({
     marginBottom: theme.spacing.unit
   },
   control: {
-    display: "flex",
+    display: 'flex',
     marginRight: theme.spacing.unit * 2
   },
   group: {
-    display: "block"
+    display: 'block'
   },
   grow: {
     flexGrow: 1
   },
   flex: {
-    display: "flex"
+    display: 'flex'
   },
   select: {
     paddingTop: theme.spacing.unit * 1,
     width: 200
   },
   advanced: {
-    display: "flex",
-    justifyContent: "center",
+    display: 'flex',
+    justifyContent: 'center',
     marginTop: theme.spacing.unit * 4,
-    "& button": {
-      textTransform: "none",
-      "& span svg": {
-        marginLeft: "1.5em"
+    '& button': {
+      textTransform: 'none',
+      '& span svg': {
+        marginLeft: '1.5em'
       }
     }
   }
 });
 
 class Preferences extends React.Component {
-  state = {
-    devTools: false,
-    advanced: false,
-    verboseFocus: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      devTools: false,
+      advanced: false,
+      verboseFocus: false
+    };
+  }
 
   componentDidMount() {
     const webContents = Electron.remote.getCurrentWebContents();
     this.setState({ devTools: webContents.isDevToolsOpened() });
-    webContents.on("devtools-opened", () => {
+    webContents.on('devtools-opened', () => {
       this.setState({ devTools: true });
     });
-    webContents.on("devtools-closed", () => {
+    webContents.on('devtools-closed', () => {
       this.setState({ devTools: false });
     });
 
-    let focus = new Focus();
+    const focus = new Focus();
     this.setState({ verboseFocus: focus.debug });
   }
 
@@ -116,7 +118,7 @@ class Preferences extends React.Component {
   setLanguage = async event => {
     i18n.setLanguage(event.target.value);
     await this.setState({});
-    settings.set("ui.language", event.target.value);
+    settings.set('ui.language', event.target.value);
   };
 
   toggleAdvanced = () => {
@@ -127,12 +129,16 @@ class Preferences extends React.Component {
 
   toggleVerboseFocus = event => {
     this.setState({ verboseFocus: event.target.checked });
-    let focus = new Focus();
+    const focus = new Focus();
     focus.debug = event.target.checked;
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, darkMode, toggleDarkMode } = this.props;
+
+    const darkModeSwitch = (
+      <Switch checked={darkMode} onChange={toggleDarkMode} value="devtools" />
+    );
 
     const devToolsSwitch = (
       <Switch
@@ -155,23 +161,29 @@ class Preferences extends React.Component {
         <Portal container={this.props.titleElement}>
           {i18n.app.menu.preferences}
         </Portal>
+        <Typography
+          variant="subtitle1"
+          component="h2"
+          className={classes.title}
+        >
+          {i18n.preferences.interface}
+        </Typography>
+        <Card>
+          <CardContent>
+            <FormControlLabel
+              className={classes.control}
+              classes={{ label: classes.grow }}
+              control={darkModeSwitch}
+              labelPlacement="start"
+              label={i18n.preferences.darkMode}
+            />
+          </CardContent>
+        </Card>
         {this.props.connected && (
           <KeyboardSettings
             startContext={this.props.startContext}
             cancelContext={this.props.cancelContext}
             inContext={this.props.inContext}
-          />
-        )}
-        {this.props.connected && false && (
-          <ColorSettings
-            startContext={this.props.startContext}
-            cancelContext={this.props.cancelContext}
-            inContext={this.props.inContext}
-            balance={this.props.balance}
-            setBalance={this.props.setBalance}
-            testBalance={this.props.testBalance}
-            startTestBalance={this.props.startTestBalance}
-            stopTestBalance={this.props.stopTestBalance}
           />
         )}
         <div className={classes.advanced}>
@@ -218,9 +230,5 @@ class Preferences extends React.Component {
     );
   }
 }
-
-Preferences.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 export default withStyles(styles)(Preferences);

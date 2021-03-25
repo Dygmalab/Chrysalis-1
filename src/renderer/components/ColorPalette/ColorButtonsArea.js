@@ -20,29 +20,7 @@
 import React, { useState, useEffect } from "react";
 import uuid from "uuid";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
 import ColorButton from "./ColorButton";
-
-ColorButtonsArea.propTypes = {
-  classes: PropTypes.object.isRequired,
-  colorFocusButton: PropTypes.object,
-  indexFocusButton: PropTypes.any,
-  setIsFocus: PropTypes.func.isRequired,
-  palette: PropTypes.array.isRequired,
-  disabled: PropTypes.bool.isRequired
-};
-
-const styles = theme => ({
-  palette: {
-    [theme.breakpoints.down("sm")]: {
-      padding: 0
-    },
-    maxWidth: 95,
-    margin: "0 auto",
-    marginBottom: 25
-  }
-});
 
 /**
  * Reactjs functional component that create area for color buttons
@@ -56,12 +34,11 @@ const styles = theme => ({
  */
 function ColorButtonsArea(props) {
   const {
-    classes,
     colorFocusButton,
     indexFocusButton,
     setIsFocus,
     palette,
-    disabled
+    disabled,
   } = props;
 
   /**
@@ -77,13 +54,13 @@ function ColorButtonsArea(props) {
       colorButtonsAmount[indexFocusButton] = { ...colorFocusButton };
       setColorButtonsAmount(colorButtonsAmount);
     }
-  }, [colorFocusButton]);
+  }, [colorButtonsAmount, colorFocusButton, indexFocusButton]);
   /**
    * Render color buttons area by two arrays from prop "pallete"
    */
   const displayGrids = () => {
     return (
-      <Grid container justify="center" alignItems="center">
+      <grid container justify="center" alignItems="center">
         {palette.map((colorButton, i) => (
           <ColorButton
             key={uuid()}
@@ -94,15 +71,20 @@ function ColorButtonsArea(props) {
             disabled={disabled}
           />
         ))}
-      </Grid>
+      </grid>
     );
   };
 
   return (
-    <div className={classes.palette}>
-      <Grid container>{displayGrids()}</Grid>
+    <div className="">
+      <grid container>{displayGrids()}</grid>
     </div>
   );
 }
 
-export default withStyles(styles)(ColorButtonsArea);
+ColorButtonsArea.propTypes = {
+  setIsFocus: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired,
+};
+
+export default ColorButtonsArea;

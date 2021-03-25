@@ -17,31 +17,22 @@
 /**
  * This is Reactjs functional component that create area for color buttons
  */
-import React, { useState, useEffect } from "react";
-import uuid from "uuid";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import ColorFillButton from "./ColorFillButton";
-
-ColorPaletteArea.propTypes = {
-  classes: PropTypes.object.isRequired,
-  colorFocusButton: PropTypes.object,
-  indexFocusButton: PropTypes.any,
-  setIsFocus: PropTypes.func.isRequired,
-  palette: PropTypes.array.isRequired,
-  disabled: PropTypes.bool.isRequired
-};
+import React, { useState, useEffect } from 'react';
+import uuid from 'uuid';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import ColorFillButton from './ColorFillButton';
 
 const styles = theme => ({
   palette: {
-    padding: "40px 25px 25px 25px",
-    [theme.breakpoints.down("sm")]: {
+    padding: '40px 25px 25px 25px',
+    [theme.breakpoints.down('sm')]: {
       padding: 0
     },
     width: 130,
-    borderTopColor: "#dfdfdf",
-    borderTop: "2px solid"
+    borderTopColor: '#dfdfdf',
+    borderTop: '2px solid'
   }
 });
 
@@ -108,5 +99,10 @@ function ColorPaletteArea(props) {
     </div>
   );
 }
+
+ColorPaletteArea.propTypes = {
+  setIsFocus: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired
+};
 
 export default withStyles(styles)(ColorPaletteArea);

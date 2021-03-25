@@ -16,52 +16,19 @@
  */
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Tooltip from "@material-ui/core/Tooltip";
-import Button from "@material-ui/core/Button";
-
-UnderglowButton.propTypes = {
-  classes: PropTypes.object.isRequired,
-  colorFocusButton: PropTypes.object,
-  palette: PropTypes.array.isRequired,
-  indexFocusButton: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.number,
-    PropTypes.oneOf([null])
-  ]),
-  theme: PropTypes.object.isRequired,
-  disabled: PropTypes.bool.isRequired,
-  toChangeAllKeysColor: PropTypes.func.isRequired
-};
-
-const styles = () => ({
-  root: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 25
-  },
-  button: {
-    width: 95,
-    cursor: "pointer",
-    fontSize: 10,
-    color: "#fff",
-    backgroundColor: "#303f9f"
-  }
-});
 
 const styleDisabled = {
   background: "#e0e0e0",
   pointerEvents: "none",
   cursor: "default",
-  color: "#797979"
+  color: "#797979",
 };
 
 const styleDisabledDark = {
   pointerEvents: "none",
   cursor: "default",
   color: "rgba(255, 255, 255, 0.3)",
-  backgroundColor: "rgba(255, 255, 255, 0.12)"
+  backgroundColor: "rgba(255, 255, 255, 0.12)",
 };
 
 /**
@@ -75,13 +42,12 @@ const styleDisabledDark = {
  */
 function UnderglowButton(props) {
   const {
-    classes,
     colorFocusButton,
     toChangeAllKeysColor,
     disabled,
     indexFocusButton,
     palette,
-    darkMode
+    darkMode,
   } = props;
   const minWhiteColorValue = 140;
   const isWhiteColor =
@@ -90,43 +56,47 @@ function UnderglowButton(props) {
     colorFocusButton.b >= minWhiteColorValue;
   const style = {
     background: palette[indexFocusButton] && palette[indexFocusButton].rgb,
-    color: !isWhiteColor ? "white" : "black"
+    color: !isWhiteColor ? "white" : "black",
   };
   const enable = {
     pointerEvents: "auto",
     cursor: "pointer",
     color: !isWhiteColor ? "white" : "black",
-    background: `rgb(${colorFocusButton.r}, ${colorFocusButton.g}, ${
-      colorFocusButton.b
-    })`
+    background: `rgb(${colorFocusButton.r}, ${colorFocusButton.g},
+      ${colorFocusButton.b})`,
   };
   const [, setBackgroundColor] = useState(enable);
   useEffect(() => {
     return () => setBackgroundColor(style);
-  }, []);
+  }, [style]);
   return (
-    <Tooltip placement="top-start" title={props.children}>
-      <div className={classes.root}>
-        <Button
+    <tooltip placement="top-start" title={props.children}>
+      <div className="">
+        <button
           variant="contained"
-          className={classes.button}
+          className=""
           style={
             (!+indexFocusButton && indexFocusButton !== 0) || disabled
               ? darkMode
                 ? styleDisabledDark
                 : styleDisabled
-              : styles().button
+              : {}
           }
           onClick={() => {
             toChangeAllKeysColor(indexFocusButton, 69, 142);
             setBackgroundColor(enable);
           }}
         >
-          {"UNDERGLOW"}
-        </Button>
+          UNDERGLOW
+        </button>
       </div>
-    </Tooltip>
+    </tooltip>
   );
 }
 
-export default withStyles(styles)(UnderglowButton);
+UnderglowButton.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+  toChangeAllKeysColor: PropTypes.func.isRequired,
+};
+
+export default UnderglowButton;

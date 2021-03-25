@@ -15,169 +15,168 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
-import classNames from "classnames";
+import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
+import Styled from 'styled-components';
 
-import Fade from "@material-ui/core/Fade";
-import FileCopyIcon from "@material-ui/icons/FileCopy";
-import FormControl from "@material-ui/core/FormControl";
-import IconButton from "@material-ui/core/IconButton";
+// Bootstrap components
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import Spinner from 'react-bootstrap/Spinner';
+import Dropdown from 'react-bootstrap/Dropdown';
+import Tooltip from 'react-bootstrap/Tooltip';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+
+// Icons
 import {
-  GetAppRounded,
-  PublishRounded,
-  UnarchiveRounded
-} from "@material-ui/icons";
-import LayersClearIcon from "@material-ui/icons/LayersClear";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import LockIcon from "@material-ui/icons/Lock";
-import MenuItem from "@material-ui/core/MenuItem";
-import Portal from "@material-ui/core/Portal";
-import Select from "@material-ui/core/Select";
-import Slide from "@material-ui/core/Slide";
-import Toolbar from "@material-ui/core/Toolbar";
-import Tooltip from "@material-ui/core/Tooltip";
-import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
+  MDLock,
+  MdImportExport,
+  MdContentCopy,
+  MdLayersClear,
+  MdSave,
+} from 'react-icons/md';
 
-import Focus from "../../../api/focus";
-import Keymap, { KeymapDB } from "../../../api/keymap";
+import Keymap, { KeymapDB } from '../../../api/keymap';
+import Focus from '../../../api/focus';
+// import ColorPalette from "../../components/ColorPalette";
+// import KeySelector from "./KeySelector";
+import LayerPanel from './LayerPanel';
+import ToolBar from '../../components/edit-tool/Toolbar';
+import SaveChangesButton from '../../components/SaveChangesButton';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
+import i18n from '../../i18n';
+import ImportExportDialog from './ImportExportDialog';
+import CopyFromDialog from './CopyFromDialog';
+import undeglowDefaultColors from './initialUndaglowColors';
 
-import ColorPalette from "../../components/ColorPalette";
-import KeySelector from "./KeySelector";
-import SaveChangesButton from "../../components/SaveChangesButton";
-import ConfirmationDialog from "../../components/ConfirmationDialog";
-import i18n from "../../i18n";
-import settings from "electron-settings";
-import { CopyFromDialog } from "./CopyFromDialog";
-import { undeglowDefaultColors } from "./initialUndaglowColors";
+// New Imports for ML Layers
+import { backupLayers, shareLayers } from '../../../firebase/firebase.utils';
+import ColorPanel from './ColorPanel';
+import { KeyPicker, LayerPicker, MiscPicker } from '../../components/KeyPicker';
 
-const Store = window.require("electron-store");
+const { remote } = require('electron');
+
+const Store = remote.require('electron-store');
 const store = new Store();
 
-const styles = theme => ({
-  tbg: {
-    marginRight: theme.spacing.unit * 4
-  },
-  layerSelectItem: {
-    display: "inline-flex"
-  },
-  grow: {
-    flexGrow: 1
-  },
-  editor: {
-    display: "block",
-    margin: "2px auto"
-  },
-  moreMenu: {
-    marginTop: theme.spacing.unit * 4
-  },
-  layerItem: {
-    paddingLeft: theme.spacing.unit * 4
-  },
-  layerSelect: {
-    marginRight: theme.spacing.unit * 4
-  },
-  tabWrapper: {
-    flexDirection: "row",
-    "& svg": {
-      position: "relative",
-      top: -theme.spacing.unit / 2
-    }
-  },
-  tabLabelContainer: {
-    width: "auto",
-    padding: `6px ${theme.spacing.unit}px`
-  },
-  disabledLayer: {
-    opacity: 0.5,
-    filter: "saturate(25%)"
-  },
-  toolbar: {
-    position: "absolute",
-    right: 0,
-    top: 21
-  }
-});
+const Styles = Styled.div`
+.keyboard-editor {
+  .editor {
+    margin-left: 210px;
+    margin-right: 210px;
+    display: flex;
+    justify-content: space-between;
 
-class Editor extends React.Component {
+    .raise-editor {
+      text-align: center;
+      align-self: center;
+      padding: unset;
+      margin-top: 15px;
+      svg {
+        height: 57vh;
+        max-width: 70vw;
+      }
+    }
+  }
+}`;
+
+class Editor extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       currentLayer: 0,
       currentKeyIndex: -1,
       currentLedIndex: -1,
       modified: false,
-      saving: false,
       keymap: {
         custom: [],
         default: [],
-        onlyCustom: false
+        onlyCustom: false,
       },
       palette: [],
       colorMap: [],
-      macros: [],
-      storedMacros: store.get("macros"),
-      equalMacros: [],
       clearConfirmationOpen: false,
       copyFromOpen: false,
       importExportDialogOpen: false,
       isMultiSelected: false,
       isColorButtonSelected: false,
-      currentLanguageLayout: "",
-      undeglowColors: null
+      undeglowColors: null,
     };
-    this.updateMacros = this.updateMacros.bind(this);
-    this.toExport = this.toExport.bind(this);
-    this.toImport = this.toImport.bind(this);
-    this.toExportAll = this.toExportAll.bind(this);
   }
 
+  componentDidMount() {
+    this.scanKeyboard().then(() => {
+      const { keymap } = this.state;
+      const defLayer =
+        this.state.defaultLayer >= 126 ? 0 : this.state.defaultLayer;
+      let initialLayer = 0;
+
+      if (!store.get('keymap.showDefaults')) {
+        if (defLayer < keymap.default.length) {
+          initialLayer = keymap.onlyCustom ? 0 : keymap.default.length;
+        }
+      }
+
+      this.setState({ currentLayer: initialLayer });
+    });
+    this.onChangeLanguageLayout();
+  }
+
+  UNSAFE_componentWillReceiveProps = (nextProps) => {
+    if (this.props.inContext && !nextProps.inContext) {
+      this.scanKeyboard();
+      this.setState({ modified: false });
+    }
+  };
+
   keymapDB = new KeymapDB();
+
   undeglowCount = 14;
+
   /**
    * Bottom menu never hide and automatically select a key at launch and have this shown in the bottom menu
    */
   bottomMenuNeverHide = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       currentKeyIndex: state.currentKeyIndex !== -1 ? state.currentKeyIndex : 0,
       currentLedIndex: state.currentLedIndex !== -1 ? state.currentLedIndex : 0,
       selectedPaletteColor: null,
-      isColorButtonSelected: false
+      isColorButtonSelected: false,
     }));
   };
 
   bottomMenuNeverHideFromUnderglow = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       currentKeyIndex: state.currentKeyIndex !== -1 ? state.currentKeyIndex : 0,
-      currentLedIndex: state.currentLedIndex !== -1 ? state.currentLedIndex : 0
+      currentLedIndex: state.currentLedIndex !== -1 ? state.currentLedIndex : 0,
     }));
   };
 
-  scanKeyboard = async lang => {
-    let focus = new Focus();
+  scanKeyboard = async (lang) => {
+    const focus = new Focus();
     try {
       /**
        * Create property language to the object 'options', to call KeymapDB in Keymap and modify languagu layout
        */
       if (lang) {
-        let deviceLang = { ...focus.device, language: true };
-        focus.commands.keymap = new Keymap(deviceLang);
+        const deviceLeng = { ...focus.device, language: true };
+        focus.commands.keymap = new Keymap(deviceLeng);
         this.keymapDB = focus.commands.keymap.db;
       }
 
-      let defLayer = await focus.command("settings.defaultLayer");
-      defLayer = parseInt(defLayer) || 0;
+      let defLayer = await focus.command('settings.defaultLayer');
+      defLayer = parseInt(defLayer, 10) || 0;
 
-      let keymap = await focus.command("keymap");
+      const keymap = await focus.command('keymap');
 
       let empty = true;
-      for (let layer of keymap.custom) {
-        for (let i of layer) {
-          if (i.keyCode != 65535) {
+      for (const layer of keymap.custom) {
+        for (const i of layer) {
+          if (i.keyCode !== 65535) {
             empty = false;
             break;
           }
@@ -185,37 +184,24 @@ class Editor extends React.Component {
       }
 
       if (empty && !keymap.onlyCustom && keymap.custom.length > 0) {
-        console.log("Custom keymap is empty, copying defaults");
-        for (let i = 0; i < keymap.default.length; i++) {
+        console.log('Custom keymap is empty, copying defaults');
+        for (let i = 0; i < keymap.default.length; i + 1) {
           keymap.custom[i] = keymap.default[i].slice();
         }
         keymap.onlyCustom = true;
-        await focus.command("keymap", keymap);
+        await focus.command('keymap', keymap);
       }
 
-      let colormap = await focus.command("colormap");
-      // Point of restoration for WhiteBalance
-      // let palette = this.props.revertBalance(colormap.palette.slice());
-      let palette = colormap.palette.slice();
-      const undeglowColors = settings.get("undeglowColors");
-      let raw = await focus.command("macros.map");
-      if (raw.search(" 0 0 ") !== -1) {
-        raw = raw
-          .split(" 0 0 ")[0]
-          .split(" ")
-          .map(Number);
-      } else {
-        raw = "";
-      }
-      const parsedMacros = this.macroTranslator(raw);
+      const colormap = await focus.command('colormap');
+      const palette = colormap.palette.slice();
+      const undeglowColors = store.get('undeglowColors');
       this.setState(
         () => {
           if (!undeglowColors) {
-            settings.set("undeglowColors", undeglowDefaultColors);
+            store.set('undeglowColors', undeglowDefaultColors);
             return { undeglowColors: undeglowDefaultColors };
-          } else {
-            return { undeglowColors };
           }
+          return { undeglowColors };
         },
         () => {
           palette[this.undeglowCount] = this.state.undeglowColors[
@@ -223,17 +209,15 @@ class Editor extends React.Component {
           ];
           this.setState({
             defaultLayer: defLayer,
-            keymap: keymap,
-            showDefaults: !keymap.onlyCustom,
+            keymap,
             palette,
             colorMap: colormap.colorMap,
-            macros: parsedMacros
           });
         }
       );
       this.bottomMenuNeverHide();
     } catch (e) {
-      this.props.enqueueSnackbar(e, { variant: "error" });
+      // this.props.enqueueSnackbar(e, { variant: "error" }); TODO: A sustituir por nueva herramienta de notificaciones
       this.props.onDisconnect();
     }
   };
@@ -241,8 +225,8 @@ class Editor extends React.Component {
   getCurrentKey() {
     if (this.state.currentKeyIndex < 0) return -1;
 
-    let layer = parseInt(this.state.currentLayer),
-      keyIndex = parseInt(this.state.currentKeyIndex);
+    let layer = parseInt(this.state.currentLayer, 10);
+    const keyIndex = parseInt(this.state.currentKeyIndex, 10);
 
     if (keyIndex >= 80) return 0;
 
@@ -253,27 +237,26 @@ class Editor extends React.Component {
       }
 
       return this.state.keymap.custom[layer][keyIndex].keyCode;
-    } else {
-      const offset = this.state.keymap.default.length;
-      if (layer < this.state.keymap.default.length)
-        return this.state.keymap.default[layer][keyIndex].keyCode;
-
-      return this.state.keymap.custom[layer - offset][keyIndex].keyCode;
     }
+    const offset = this.state.keymap.default.length;
+    if (layer < this.state.keymap.default.length)
+      return this.state.keymap.default[layer][keyIndex].keyCode;
+
+    return this.state.keymap.custom[layer - offset][keyIndex].keyCode;
   }
 
-  onKeyChange = keyCode => {
+  onKeyChange = (keyCode) => {
     // Keys can only change on the custom layers
 
-    let layer = this.state.currentLayer,
-      keyIndex = this.state.currentKeyIndex;
+    const layer = this.state.currentLayer;
+    const keyIndex = this.state.currentKeyIndex;
 
     if (keyIndex === -1) {
       return;
     }
 
-    this.setState(state => {
-      let keymap = state.keymap.custom.slice();
+    this.setState((state) => {
+      const keymap = state.keymap.custom.slice();
       const l = state.keymap.onlyCustom
         ? layer
         : layer - state.keymap.default.length;
@@ -282,9 +265,9 @@ class Editor extends React.Component {
         keymap: {
           default: state.keymap.default,
           onlyCustom: state.keymap.onlyCustom,
-          custom: keymap
+          custom: keymap,
         },
-        modified: true
+        modified: true,
       };
     });
     this.props.startContext();
@@ -309,10 +292,11 @@ class Editor extends React.Component {
    * @param {number} ledIndex Number of current selected keyboard button
    */
   onCtrlShiftPress = (layer, ledIndex) => {
+    const selpalco = this.state.colorMap[layer][ledIndex];
     this.setState({
-      selectedPaletteColor: this.state.colorMap[layer][ledIndex],
+      selectedPaletteColor: selpalco,
       isMultiSelected: true,
-      isColorButtonSelected: true
+      isColorButtonSelected: true,
     });
   };
 
@@ -330,51 +314,50 @@ class Editor extends React.Component {
       ledIndex
     );
     if (!modified && isEqualColor) {
-      return;
+      // pass
     } else {
-      this.setState(state => {
-        let colormap = state.colorMap.slice();
+      this.setState((state) => {
+        const colormap = state.colorMap.slice();
         colormap[currentLayer][ledIndex] = this.state.selectedPaletteColor;
         this.props.startContext();
         return {
           selectedPaletteColor: this.state.colorMap[layer][ledIndex],
           colorMap: colormap,
-          modified: true
+          modified: true,
         };
       });
     }
   };
 
-  onKeySelect = event => {
+  onKeySelect = (event) => {
     const {
       selectedPaletteColor,
       currentLayer,
       isMultiSelected,
       isColorButtonSelected,
-      currentKeyIndex
+      currentKeyIndex,
     } = this.state;
-    const currentTarget = event.currentTarget;
-    let layer = parseInt(currentTarget.getAttribute("data-layer")),
-      keyIndex = parseInt(currentTarget.getAttribute("data-key-index")),
-      ledIndex = parseInt(currentTarget.getAttribute("data-led-index"));
+    const { currentTarget } = event;
+    const layer = parseInt(currentTarget.getAttribute('data-layer'), 10);
+    const keyIndex = parseInt(currentTarget.getAttribute('data-key-index'), 10);
+    const ledIndex = parseInt(currentTarget.getAttribute('data-led-index'), 10);
 
-    if (keyIndex == currentKeyIndex) {
+    if (keyIndex === currentKeyIndex) {
       if (event.ctrlKey || (event.shiftKey && !isColorButtonSelected)) {
         this.onCtrlShiftPress(layer, ledIndex);
         return;
-      } else {
-        this.setState({
-          currentKeyIndex: -1,
-          currentLedIndex: -1,
-          selectedPaletteColor: null,
-          isMultiSelected: false,
-          isColorButtonSelected: false
-        });
-        return;
       }
+      this.setState({
+        currentKeyIndex: -1,
+        currentLedIndex: -1,
+        selectedPaletteColor: null,
+        isMultiSelected: false,
+        isColorButtonSelected: false,
+      });
+      return;
     }
 
-    this.setState(state => {
+    this.setState((state) => {
       if (
         state.colorMap.length > 0 &&
         layer >= 0 &&
@@ -383,19 +366,17 @@ class Editor extends React.Component {
         return {
           currentLayer: layer,
           currentKeyIndex: keyIndex,
-          currentLedIndex: ledIndex
-        };
-      } else {
-        return {
-          currentLayer: layer,
-          currentKeyIndex: keyIndex
+          currentLedIndex: ledIndex,
         };
       }
+      return {
+        currentLayer: layer,
+        currentKeyIndex: keyIndex,
+      };
     });
 
     if (event.ctrlKey || event.shiftKey) {
       this.onCtrlShiftPress(layer, ledIndex);
-      return;
     } else {
       if (
         selectedPaletteColor !== null &&
@@ -408,7 +389,7 @@ class Editor extends React.Component {
         this.setState(
           () => {
             return {
-              isMultiSelected: true
+              isMultiSelected: true,
             };
           },
           () => {
@@ -419,101 +400,76 @@ class Editor extends React.Component {
     }
   };
 
-  selectLayer = event => {
-    if (event.target.value === undefined) return;
+  selectLayer = (id) => {
+    if (id === undefined) return;
     const { palette, undeglowColors } = this.state;
-    let newPalette = palette.slice();
-    newPalette[this.undeglowCount] = undeglowColors[event.target.value];
+    const newPalette = palette.slice();
+    newPalette[this.undeglowCount] = undeglowColors[id];
     this.setState({
-      currentLayer: event.target.value,
-      palette: newPalette
+      currentLayer: id,
+      palette: newPalette,
     });
     this.bottomMenuNeverHide();
   };
 
   onApply = async () => {
     this.setState({ saving: true });
-    settings.set("undeglowColors", this.state.undeglowColors);
-    // console.log(
-    //   "Paleta a modificar con función white balance: ",
-    //   this.state.palette
-    // );
-    let focus = new Focus();
-    await focus.command("keymap", this.state.keymap);
-    await focus.command(
-      "colormap",
-      // this.props.applyBalance(this.state.palette),
-      this.state.palette,
-      this.state.colorMap
-    );
-    let newMacros = this.state.macros;
+    store.set('undeglowColors', this.state.undeglowColors);
+    const focus = new Focus();
+    await focus.command('keymap', this.state.keymap);
+    await focus.command('colormap', this.state.palette, this.state.colorMap);
     this.setState({
       modified: false,
       saving: false,
       isMultiSelected: false,
       selectedPaletteColor: null,
       isColorButtonSelected: false,
-      macros: newMacros,
-      storedMacros: newMacros
     });
-    store.set("macros", newMacros);
-    await focus.command("macros.map", this.macrosMap(newMacros));
-    console.log("Changes saved.");
+    console.log('Changes saved.');
+    // TODO: Save changes in the cloud
+    const Layers = {
+      undeglowColors: this.state.undeglowColors,
+      keymap: this.state.keymap,
+      colormap: {
+        palette: this.state.palette,
+        colorMap: this.state.colorMap,
+      },
+    };
+    // backupLayers(Layers);
     this.props.cancelContext();
+  };
+
+  sharelayers = async () => {
+    // TODO: Share layers in the cloud
+    const Layers = {
+      undeglowColors: this.state.undeglowColors,
+      keymap: this.state.keymap,
+      colormap: {
+        palette: this.state.palette,
+        colorMap: this.state.colorMap,
+      },
+    };
+    shareLayers(Layers);
   };
 
   // Callback function to set State of new Language
   onChangeLanguageLayout = () => {
     this.setState({
-      currentLanguageLayout: settings.get("keyboard.language") || "english"
+      currentLanguageLayout: store.get('keyboard.language') || 'english',
     });
-  };
-
-  componentDidMount() {
-    this.scanKeyboard().then(() => {
-      const { keymap } = this.state;
-      const defLayer =
-        this.state.defaultLayer >= 126 ? 0 : this.state.defaultLayer;
-      let initialLayer = 0;
-
-      if (!settings.get("keymap.showDefaults")) {
-        if (defLayer < keymap.default.length) {
-          initialLayer = keymap.onlyCustom ? 0 : keymap.default.length;
-        }
-      }
-
-      this.setState({ currentLayer: initialLayer });
-    });
-    this.onChangeLanguageLayout();
-  }
-
-  UNSAFE_componentWillReceiveProps = nextProps => {
-    if (this.props.inContext && !nextProps.inContext) {
-      this.setState({
-        currentLayer: 0,
-        currentKeyIndex: -1,
-        currentLedIndex: -1,
-        keymap: {
-          custom: [],
-          default: [],
-          onlyCustom: false
-        },
-        palette: []
-      });
-      this.scanKeyboard();
-      this.setState({ modified: false });
-    }
   };
 
   copyFromDialog = () => {
     this.setState({ copyFromOpen: true });
   };
+
   cancelCopyFrom = () => {
     this.setState({ copyFromOpen: false });
   };
-  copyFromLayer = layer => {
-    this.setState(state => {
-      let newKeymap, newColormap;
+
+  copyFromLayer = (layer) => {
+    this.setState((state) => {
+      let newKeymap;
 
       if (state.keymap.onlyCustom) {
         newKeymap =
@@ -534,7 +490,7 @@ class Editor extends React.Component {
             ? state.keymap.default[layer].slice()
             : state.keymap.custom[layer - state.keymap.default.length].slice();
       }
-      newColormap = state.colorMap.slice();
+      const newColormap = state.colorMap.slice();
       if (newColormap.length > 0)
         newColormap[state.currentLayer] = state.colorMap[
           layer >= 0 ? layer : state.currentLayer
@@ -546,17 +502,17 @@ class Editor extends React.Component {
         keymap: {
           default: state.keymap.default,
           onlyCustom: state.keymap.onlyCustom,
-          custom: newKeymap
+          custom: newKeymap,
         },
         copyFromOpen: false,
-        modified: true
+        modified: true,
       };
     });
   };
 
   clearLayer = () => {
-    this.setState(state => {
-      let newKeymap = state.keymap.custom.slice();
+    this.setState((state) => {
+      const newKeymap = state.keymap.custom.slice();
       const idx = state.keymap.onlyCustom
         ? state.currentLayer
         : state.currentLayer - state.keymap.default.length;
@@ -564,7 +520,7 @@ class Editor extends React.Component {
         .fill()
         .map(() => ({ keyCode: 0xffff }));
 
-      let newColormap = state.colorMap.slice();
+      const newColormap = state.colorMap.slice();
       if (newColormap.length > 0) {
         newColormap[idx] = Array(newColormap[0].length)
           .fill()
@@ -575,11 +531,11 @@ class Editor extends React.Component {
         keymap: {
           default: state.keymap.default,
           onlyCustom: state.keymap.onlyCustom,
-          custom: newKeymap
+          custom: newKeymap,
         },
         colorMap: newColormap,
         modified: true,
-        clearConfirmationOpen: false
+        clearConfirmationOpen: false,
       };
     });
   };
@@ -587,29 +543,29 @@ class Editor extends React.Component {
   confirmClear = () => {
     this.setState({ clearConfirmationOpen: true });
   };
+
   cancelClear = () => {
     this.setState({ clearConfirmationOpen: false });
   };
 
   onColorButtonSelect = (action, colorIndex) => {
     const { isColorButtonSelected } = this.state;
-    if (action === "one_button_click") {
+    if (action === 'one_button_click') {
       this.setState({
         isMultiSelected: false,
-        isColorButtonSelected: !isColorButtonSelected
+        isColorButtonSelected: !isColorButtonSelected,
       });
       return;
     }
-    if (action === "another_button_click") {
+    if (action === 'another_button_click') {
       this.setState({
         selectedPaletteColor: colorIndex,
-        isColorButtonSelected: true
+        isColorButtonSelected: true,
       });
-      return;
     }
   };
 
-  onColorSelect = colorIndex => {
+  onColorSelect = (colorIndex) => {
     const { currentLayer, currentLedIndex, colorMap } = this.state;
 
     const isEqualColor = this.onVerificationColor(
@@ -621,50 +577,51 @@ class Editor extends React.Component {
     if (currentLayer < 0 || currentLayer >= colorMap.length) return;
 
     if (!isEqualColor) {
-      this.setState(state => {
-        let colormap = state.colorMap.slice();
+      this.setState((state) => {
+        const colormap = state.colorMap.slice();
         colormap[currentLayer][currentLedIndex] = colorIndex;
         return {
           isMultiSelected: true,
           colorMap: colormap,
           selectedPaletteColor: colorIndex,
-          modified: true
+          modified: true,
         };
       });
       this.props.startContext();
     } else {
       this.setState({
-        selectedPaletteColor: colorIndex
+        selectedPaletteColor: colorIndex,
       });
     }
   };
 
-  onBacklightColorSelect = colorIndex => {
+  onBacklightColorSelect = (colorIndex) => {
     this.setState({
       selectedPaletteColor: colorIndex,
-      isColorButtonSelected: true
+      isColorButtonSelected: true,
     });
   };
 
+  setColors = (r, g, b) => ({
+    r,
+    g,
+    b,
+    rgb: `rgb(${r}, ${g}, ${b})`,
+  });
+
   onColorPick = (colorIndex, r, g, b) => {
-    let newPalette = this.state.palette.slice();
-    const setColors = (r, g, b) => ({
-      r,
-      g,
-      b,
-      rgb: `rgb(${r}, ${g}, ${b})`
-    });
-    newPalette[colorIndex] = setColors(r, g, b);
+    const newPalette = this.state.palette.slice();
+    newPalette[colorIndex] = this.setColors(r, g, b);
     this.setState({
       palette: newPalette,
-      modified: true
+      modified: true,
     });
     if (colorIndex === this.undeglowCount) {
       const { currentLayer } = this.state;
-      let newUndeglowColors = { ...this.state.undeglowColors };
-      newUndeglowColors[currentLayer] = setColors(r, g, b);
+      const newUndeglowColors = { ...this.state.undeglowColors };
+      newUndeglowColors[currentLayer] = this.setColors(r, g, b);
       this.setState({
-        undeglowColors: newUndeglowColors
+        undeglowColors: newUndeglowColors,
       });
     }
     this.props.startContext();
@@ -673,48 +630,48 @@ class Editor extends React.Component {
   importExportDialog = () => {
     this.setState({ importExportDialogOpen: true });
   };
+
   cancelImport = () => {
     this.setState({ importExportDialogOpen: false });
   };
-  importLayer = data => {
+
+  importLayer = (data) => {
     if (data.palette.length > 0) this.setState({ palette: data.palette });
     if (data.keymap.length > 0 && data.colormap.length > 0) {
       const { currentLayer } = this.state;
       if (this.state.keymap.onlyCustom) {
         if (currentLayer >= 0) {
-          this.setState(state => {
-            let newKeymap = this.state.keymap.custom.slice();
+          this.setState((state) => {
+            const newKeymap = this.state.keymap.custom.slice();
             newKeymap[currentLayer] = data.keymap.slice();
-            let newColormap = this.state.colorMap.slice();
+            const newColormap = this.state.colorMap.slice();
             newColormap[currentLayer] = data.colormap.slice();
             return {
               keymap: {
                 default: state.keymap.default,
                 custom: newKeymap,
-                onlyCustom: state.keymap.onlyCustom
+                onlyCustom: state.keymap.onlyCustom,
               },
-              colorMap: newColormap
+              colorMap: newColormap,
             };
           });
         }
-      } else {
-        if (currentLayer >= this.state.keymap.default.length) {
-          this.setState(state => {
-            const defLength = this.state.keymap.default.length;
-            let newKeymap = this.state.keymap.custom.slice();
-            newKeymap[currentLayer - defLength] = data.keymap;
-            let newColormap = this.state.colorMap.slice();
-            newColormap[currentLayer - defLength] = data.colormap.slice();
-            return {
-              keymap: {
-                default: state.keymap.default,
-                custom: newKeymap,
-                onlyCustom: state.keymap.onlyCustom
-              },
-              colorMap: newColormap
-            };
-          });
-        }
+      } else if (currentLayer >= this.state.keymap.default.length) {
+        this.setState((state) => {
+          const defLength = this.state.keymap.default.length;
+          const newKeymap = this.state.keymap.custom.slice();
+          newKeymap[currentLayer - defLength] = data.keymap;
+          const newColormap = this.state.colorMap.slice();
+          newColormap[currentLayer - defLength] = data.colormap.slice();
+          return {
+            keymap: {
+              default: state.keymap.default,
+              custom: newKeymap,
+              onlyCustom: state.keymap.onlyCustom,
+            },
+            colorMap: newColormap,
+          };
+        });
       }
     }
     this.setState({ modified: true });
@@ -731,8 +688,8 @@ class Editor extends React.Component {
 
   toChangeAllKeysColor = (colorIndex, start, end) => {
     const { currentLayer } = this.state;
-    this.setState(state => {
-      let colormap = state.colorMap.slice();
+    this.setState((state) => {
+      const colormap = state.colorMap.slice();
       colormap[currentLayer] = colormap[currentLayer].fill(
         colorIndex,
         start,
@@ -740,353 +697,30 @@ class Editor extends React.Component {
       );
       return {
         colorMap: colormap,
-        modified: true
+        modified: true,
       };
     });
     this.props.startContext();
   };
 
-  macroTranslator(raw) {
-    if (raw === "") {
-      return [
-        {
-          actions: [
-            { keyCode: 229, type: 6, id: 0 },
-            { keyCode: 11, type: 8, id: 1 },
-            { keyCode: 229, type: 7, id: 2 },
-            { keyCode: 8, type: 8, id: 3 },
-            { keyCode: 28, type: 8, id: 4 },
-            { keyCode: 54, type: 8, id: 5 },
-            { keyCode: 44, type: 8, id: 6 },
-            { keyCode: 229, type: 6, id: 7 },
-            { keyCode: 7, type: 8, id: 8 },
-            { keyCode: 229, type: 7, id: 9 },
-            { keyCode: 28, type: 8, id: 10 },
-            { keyCode: 10, type: 8, id: 11 },
-            { keyCode: 16, type: 8, id: 12 },
-            { keyCode: 4, type: 8, id: 13 },
-            { keyCode: 23, type: 8, id: 14 },
-            { keyCode: 8, type: 8, id: 15 }
-          ],
-          id: 0,
-          macro:
-            "RIGHT SHIFT H RIGHT SHIFT E Y , SPACE RIGHT SHIFT D RIGHT SHIFT Y G M A T E",
-          name: "Hey, Dygmate!"
-        }
-      ];
-    }
-    // Translate received macros to human readable text
-    let i = 0,
-      iter = 0,
-      kcs = 0,
-      type = 0,
-      keyCode = [],
-      actions = [],
-      macros = [];
-    actions = [];
-    while (raw.length > iter) {
-      if (kcs > 0) {
-        keyCode.push(raw[iter]);
-        kcs--;
-        iter++;
-        continue;
-      }
-      if (iter !== 0 && type !== 0) {
-        actions.push({
-          type: type,
-          keyCode: keyCode
-        });
-        keyCode = [];
-      }
-      type = raw[iter];
-      if (type > 1 && type < 6) {
-        kcs = 2;
-      } else {
-        kcs = 1;
-      }
-      if (type === 0) {
-        kcs = 0;
-        macros[i] = {};
-        macros[i].actions = actions;
-        macros[i].id = i;
-        macros[i].name = "";
-        macros[i].macro = "";
-        i++;
-        actions = [];
-        iter++;
-        continue;
-      }
-      iter++;
-    }
-    actions.push({
-      type: type,
-      keyCode: keyCode
-    });
-    macros[i] = {};
-    macros[i].actions = actions;
-    macros[i].id = i;
-    macros[i].name = "";
-    macros[i].macro = "";
-    macros = macros.map(macro => {
-      let aux = macro.actions.map(action => {
-        let aux = 0;
-        if (action.keyCode.length > 1) {
-          aux = (action.keyCode[0] << 8) + action.keyCode[1];
-        } else {
-          aux = action.keyCode[0];
-        }
-        return {
-          type: action.type,
-          keyCode: aux
-        };
-      });
-      return { ...macro, actions: aux };
-    });
-    // TODO: Check if stored macros match the received ones, if they mach, retrieve name and apply it to current macros
-    let equal = [];
-    let finalMacros = [];
-    const stored = this.state.storedMacros;
-    console.log(macros, stored);
-    if (stored === undefined) {
-      return macros;
-    }
-    finalMacros = macros.map((macro, i) => {
-      if (stored.length > i && stored.length > 0) {
-        console.log("compare between: ", macro.actions, stored[i].actions);
-        if (macro.actions.join(",") === stored[i].actions.join(",")) {
-          equal[i] = true;
-          let aux = macro;
-          aux.name = stored[i].name;
-          return aux;
-        } else {
-          equal[i] = false;
-          return macro;
-        }
-      } else {
-        return macro;
-      }
-    });
-    this.setState({ equalMacros: equal });
+  render() {
+    const { keymap, palette, isColorButtonSelected } = this.state;
 
-    return finalMacros;
-  }
+    const focus = new Focus();
+    let Layer = '';
 
-  updateMacros(recievedMacros) {
-    console.log("Updating Macros", recievedMacros);
-    this.setState({ macros: recievedMacros, modified: true });
-    this.props.startContext();
-  }
+    // Layer = focus.device.components.keymap;
 
-  macrosMap(macros) {
-    if (macros.length === 1 && macros[0].actions === []) {
-      return "255 255 255 255 255 255 255 255 255 255";
-    }
-    const actionMap = macros.map(macro => {
-      return macro.actions
-        .map(action => {
-          if (action.type > 1 && action.type < 6) {
-            return [
-              [action.type],
-              [action.keyCode >> 8],
-              [action.keyCode & 255]
-            ];
-          } else {
-            return [[action.type], [action.keyCode]];
-          }
-        })
-        .concat([0]);
-    });
-    const mapped = [].concat
-      .apply([], actionMap.flat())
-      .concat([0])
-      .join(" ");
-    console.log(mapped);
-    return mapped;
-  }
-
-  getLayout() {
-    let focus = new Focus();
-    let Layer = {};
     try {
       Layer = focus.device.components.keymap;
     } catch (error) {
-      console.log("There is no spoon error: ", error);
-      this.forceUpdate();
+      console.log(error);
+      return <Redirect to="/keyboard-select" />;
     }
 
-    return Layer;
-  }
+    const showDefaults = store.get('keymap.showDefaults');
 
-  toImport() {
-    let options = {
-      title: "Load Layer/s file",
-      buttonLabel: "Load Layer/s",
-      filters: [
-        { name: "Json", extensions: ["json"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
-    };
-    const remote = require("electron").remote;
-    const WIN = remote.getCurrentWindow();
-    remote.dialog
-      .showOpenDialog(WIN, options)
-      .then(resp => {
-        if (!resp.canceled) {
-          console.log(resp.filePaths);
-          let layers;
-          try {
-            layers = JSON.parse(require("fs").readFileSync(resp.filePaths[0]));
-            console.log(Array.isArray(layers.keymap));
-            if (Array.isArray(layers.keymap)) {
-              console.log(layers.keymap[0]);
-              this.importLayer(layers);
-              this.props.enqueueSnackbar(
-                "Imported to current Layer succesfully",
-                {
-                  variant: "success",
-                  autoHideDuration: 2000
-                }
-              );
-            } else {
-              console.log(layers.keymap.custom[0]);
-              this.setState({
-                keymap: layers.keymap,
-                colorMap: layers.colormap,
-                palette: layers.palette,
-                modified: true
-              });
-              this.props.startContext();
-              this.props.enqueueSnackbar("Imported all Layers succesfully", {
-                variant: "success",
-                autoHideDuration: 2000
-              });
-            }
-          } catch (e) {
-            console.error(e);
-            this.props.enqueueSnackbar("Not a valid Layer file", {
-              variant: "error",
-              autoHideDuration: 2000
-            });
-            return;
-          }
-        } else {
-          console.log("user closed SaveDialog");
-        }
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
-  toExport() {
-    const { keymap, currentLayer } = this.state;
-    let layerData, isReadOnly;
-    if (keymap.onlyCustom) {
-      isReadOnly = currentLayer < 0;
-      layerData = isReadOnly
-        ? keymap.default[currentLayer + keymap.default.length]
-        : keymap.custom[currentLayer];
-    } else {
-      isReadOnly = currentLayer < keymap.default.length;
-      layerData = isReadOnly
-        ? keymap.default[currentLayer]
-        : keymap.custom[currentLayer - keymap.default.length];
-    }
-    let data = JSON.stringify(
-      {
-        keymap: layerData,
-        colormap: this.state.colorMap[currentLayer],
-        palette: this.state.palette
-      },
-      null,
-      2
-    );
-    let options = {
-      title: "Save Layer file",
-      defaultPath: "Layer" + currentLayer + ".json",
-      buttonLabel: "Save Layer",
-      filters: [
-        { name: "Json", extensions: ["json"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
-    };
-    const remote = require("electron").remote;
-    const WIN = remote.getCurrentWindow();
-    remote.dialog
-      .showSaveDialog(WIN, options)
-      .then(resp => {
-        if (!resp.canceled) {
-          console.log(resp.filePath, data);
-          require("fs").writeFileSync(resp.filePath, data);
-          this.props.enqueueSnackbar("Export Successful", {
-            variant: "success",
-            autoHideDuration: 2000
-          });
-        } else {
-          console.log("user closed SaveDialog");
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        this.props.enqueueSnackbar("Error at Exporting: " + err, {
-          variant: "error",
-          autoHideDuration: 2000
-        });
-      });
-  }
-
-  toExportAll() {
-    const { keymap, colorMap, palette } = this.state;
-    let data = JSON.stringify(
-      {
-        keymap,
-        colormap: colorMap,
-        palette
-      },
-      null,
-      2
-    );
-    let options = {
-      title: "Backup Layers file",
-      defaultPath: "Layers.json",
-      buttonLabel: "Backup Layers",
-      filters: [
-        { name: "Json", extensions: ["json"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
-    };
-    const remote = require("electron").remote;
-    const WIN = remote.getCurrentWindow();
-    remote.dialog
-      .showSaveDialog(WIN, options)
-      .then(resp => {
-        if (!resp.canceled) {
-          console.log(resp.filePath, data);
-          require("fs").writeFileSync(resp.filePath, data);
-          this.props.enqueueSnackbar("Backed up Layers Successfully", {
-            variant: "success",
-            autoHideDuration: 2000
-          });
-        } else {
-          console.log("user closed SaveDialog");
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        this.props.enqueueSnackbar("Error at Exporting: " + err, {
-          variant: "error",
-          autoHideDuration: 2000
-        });
-      });
-  }
-
-  render() {
-    const { classes } = this.props;
-    const { keymap, palette, isColorButtonSelected } = this.state;
-    let Layer = this.getLayout();
-    const showDefaults = settings.get("keymap.showDefaults");
-
-    let currentLayer = this.state.currentLayer;
+    let { currentLayer } = this.state;
 
     if (!showDefaults) {
       if (currentLayer < keymap.default.length && !keymap.onlyCustom) {
@@ -1094,7 +728,8 @@ class Editor extends React.Component {
       }
     }
 
-    let layerData, isReadOnly;
+    let layerData;
+    let isReadOnly;
     if (keymap.onlyCustom) {
       isReadOnly = currentLayer < 0;
       layerData = isReadOnly
@@ -1108,21 +743,21 @@ class Editor extends React.Component {
     }
 
     const layer = (
-      <Fade in appear key={currentLayer}>
-        <div className={classes.editor}>
-          <Layer
-            className={classNames("layer", isReadOnly && classes.disabledLayer)}
-            readOnly={isReadOnly}
-            index={currentLayer}
-            keymap={layerData}
-            onKeySelect={this.onKeySelect}
-            selectedKey={this.state.currentKeyIndex}
-            palette={this.state.palette}
-            colormap={this.state.colorMap[this.state.currentLayer]}
-            theme={this.props.theme}
-          />
-        </div>
-      </Fade>
+      // <fade in appear key={currentLayer}>
+      <div className="">
+        <Layer
+          readOnly={isReadOnly}
+          index={currentLayer}
+          keymap={layerData}
+          onKeySelect={this.onKeySelect}
+          selectedKey={this.state.currentKeyIndex}
+          palette={this.state.palette}
+          colormap={this.state.colorMap[this.state.currentLayer]}
+          theme={this.props.theme}
+          style={{ width: '70vw' }}
+        />
+      </div>
+      // </fade>
     );
 
     const copyCustomItems = this.state.keymap.custom.map((_, index) => {
@@ -1131,18 +766,18 @@ class Editor extends React.Component {
 
       return {
         index: idx,
-        label: label
+        label,
       };
     });
     const copyDefaultItems =
       showDefaults &&
       keymap.default.map((_, index) => {
-        const idx = index - (keymap.onlyCustom ? keymap.default.length : 0),
-          label = i18n.formatString(i18n.components.layer, idx);
+        const idx = index - (keymap.onlyCustom ? keymap.default.length : 0);
+        const label = i18n.formatString(i18n.components.layer, idx);
 
         return {
           index: idx,
-          label: label
+          label,
         };
       });
     const copyFromLayerOptions = (copyDefaultItems || []).concat(
@@ -1152,96 +787,78 @@ class Editor extends React.Component {
     const defaultLayerMenu =
       showDefaults &&
       keymap.default.map((_, index) => {
-        const idx = index - (keymap.onlyCustom ? keymap.default.length : 0),
-          menuKey = "layer-menu-" + idx.toString();
-        return (
-          <MenuItem value={idx} key={menuKey}>
-            <ListItemIcon>
-              <LockIcon />
-            </ListItemIcon>
-            <ListItemText
-              inset
-              primary={i18n.formatString(i18n.components.layer, idx)}
-            />
-          </MenuItem>
-        );
+        const idx = index - (keymap.onlyCustom ? keymap.default.length : 0);
+        return {
+          name: i18n.formatString(i18n.components.layer, idx),
+          id: idx,
+        };
       });
 
     const customLayerMenu = keymap.custom.map((_, index) => {
-      const idx = index + (keymap.onlyCustom ? 0 : keymap.default.length),
-        menuKey = "layer-menu-" + idx.toString();
-      return (
-        <MenuItem value={idx} key={menuKey}>
-          <ListItemText
-            inset
-            primary={i18n.formatString(i18n.components.layer, idx)}
-          />
-        </MenuItem>
-      );
+      const idx = index + (keymap.onlyCustom ? 0 : keymap.default.length);
+      return {
+        name: i18n.formatString(i18n.components.layer, idx + 1),
+        id: idx,
+      };
     });
 
-    const layerMenu = (defaultLayerMenu || []).concat(customLayerMenu);
+    // const layerMenu = (defaultLayerMenu || []).concat(customLayerMenu);
+    const layerMenu = customLayerMenu;
 
     return (
-      <React.Fragment>
-        <Portal container={this.props.titleElement}>
-          {i18n.app.menu.editor}
-        </Portal>
-        <Portal container={this.props.appBarElement}>
-          <Toolbar className={classes.toolbar}>
-            <div className={classes.grow} />
-            <FormControl className={classes.layerSelect}>
-              <Select
-                value={currentLayer}
-                classes={{ selectMenu: classes.layerSelectItem }}
-                autoWidth
-                onClick={this.selectLayer}
-              >
-                {layerMenu}
-              </Select>
-            </FormControl>
-            <div>
-              <Tooltip disableFocusListener title={"Export the current Layer"}>
-                <IconButton onClick={this.toExport}>
-                  <PublishRounded />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                disableFocusListener
-                title={"Import current Layer or Backup"}
-              >
-                <IconButton onClick={this.toImport}>
-                  <GetAppRounded />
-                </IconButton>
-              </Tooltip>
-              <Tooltip disableFocusListener title={i18n.editor.copyFrom}>
-                <IconButton disabled={isReadOnly} onClick={this.copyFromDialog}>
-                  <FileCopyIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={i18n.editor.clearLayer}>
-                <IconButton disabled={isReadOnly} onClick={this.confirmClear}>
-                  <LayersClearIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                disableFocusListener
-                title={"Backup all Layers (Excluding Macros)"}
-              >
-                <IconButton onClick={this.toExportAll}>
-                  <UnarchiveRounded />
-                </IconButton>
-              </Tooltip>
-            </div>
-          </Toolbar>
-        </Portal>
-        {this.state.keymap.custom.length == 0 &&
-          this.state.keymap.default.length == 0 && (
-            <LinearProgress variant="query" />
-          )}
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          {layer}
-          <ColorPalette
+      <Styles>
+        <Container fluid className="keyboard-editor">
+          <Row className="title-row">
+            <h4 className="section-title">Keymap and Color Editor</h4>
+          </Row>
+          <Row>
+            <Col>
+              <LayerPanel
+                layers={layerMenu}
+                selectLayer={this.selectLayer}
+                currentLayer={currentLayer}
+                isReadOnly={isReadOnly}
+                importTitle={i18n.editor.importExport}
+                importFunc={this.importExportDialog}
+                copyTitle={i18n.editor.copyFrom}
+                copyFunc={this.copyFromDialog}
+                clearTitle={i18n.editor.clearLayer}
+                clearFunc={this.confirmClear}
+              />
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <ColorPanel
+                key={palette}
+                colors={palette}
+                disabled={
+                  isReadOnly || currentLayer > this.state.colorMap.length
+                }
+                onColorSelect={this.onColorSelect}
+                colorButtonIsSelected={this.state.colorButtonIsSelected}
+                onColorPick={this.onColorPick}
+                selected={this.state.selectedPaletteColor}
+                isColorButtonSelected={isColorButtonSelected}
+                onColorButtonSelect={this.onColorButtonSelect}
+                toChangeAllKeysColor={this.toChangeAllKeysColor}
+              />
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <LayerPicker onKeySelect={this.onKeyChange} />
+              <MiscPicker onKeySelect={this.onKeyChange} />
+            </Col>
+          </Row>
+          {this.state.keymap.custom.length === 0 &&
+            this.state.keymap.default.length === 0 && (
+              <linearProgress variant="query" />
+            )}
+          <Row className="editor">
+            <Col className="raise-editor">
+              {layer}
+              {/* <ColorPalette
             disabled={isReadOnly || currentLayer > this.state.colorMap.length}
             onColorSelect={this.onColorSelect}
             colorButtonIsSelected={this.state.colorButtonIsSelected}
@@ -1255,9 +872,10 @@ class Editor extends React.Component {
             onBacklightColorSelect={this.onBacklightColorSelect}
             className="palette"
             darkMode={this.props.darkMode}
-          />
-        </div>
-        <Slide in={this.getCurrentKey() != -1} direction="up" unmountOnExit>
+          /> */}
+            </Col>
+          </Row>
+          {/* <Slide in={this.getCurrentKey() != -1} direction="up" unmountOnExit>
           <KeySelector
             disabled={isReadOnly}
             onKeySelect={this.onKeyChange}
@@ -1265,41 +883,66 @@ class Editor extends React.Component {
             scanKeyboard={this.scanKeyboard}
             currentLanguageLayout={this.state.currentLanguageLayout}
             onChangeLanguageLayout={this.onChangeLanguageLayout}
-            macros={this.state.macros}
-            maxMacros={32}
-            updateMacros={this.updateMacros}
-            keymapDB={this.keymapDB}
+            drawerWidth={this.props.drawerWidth}
           />
-        </Slide>
-        <SaveChangesButton
-          floating
-          onClick={this.onApply}
-          disabled={!this.state.modified}
-        >
-          {i18n.components.save.saveChanges}
-        </SaveChangesButton>
-        <ConfirmationDialog
-          title={i18n.editor.clearLayerQuestion}
-          open={this.state.clearConfirmationOpen}
-          onConfirm={this.clearLayer}
-          onCancel={this.cancelClear}
-        >
-          {i18n.editor.clearLayerPrompt}
-        </ConfirmationDialog>
-        <CopyFromDialog
-          open={this.state.copyFromOpen}
-          onCopy={this.copyFromLayer}
-          onCancel={this.cancelCopyFrom}
-          layers={copyFromLayerOptions}
-          currentLayer={currentLayer}
-        />
-      </React.Fragment>
+        </Slide> */}
+          {/* <Slide in={this.getCurrentKey() !== -1} direction="up">
+          <Demo />
+          <ToolBar />
+        </Slide> */}
+          <Row>
+            {/* <ToolBar onKeySelect={this.onKeyChange} /> */}
+            <KeyPicker onKeySelect={this.onKeyChange} />
+          </Row>
+          <SaveChangesButton
+            floating
+            onClick={this.onApply}
+            disabled={!this.state.modified}
+          >
+            {i18n.components.save.saveChanges}
+          </SaveChangesButton>
+          <button
+            onClick={this.sharelayers}
+            disabled={false}
+            style={{
+              padding: '6px 8px',
+              right: '80px',
+              bottom: '16px',
+              position: 'fixed',
+              justifyContent: 'flex-end',
+            }}
+          >
+            Share Content
+          </button>
+          <ConfirmationDialog
+            title={i18n.editor.clearLayerQuestion}
+            open={this.state.clearConfirmationOpen}
+            onConfirm={this.clearLayer}
+            onCancel={this.cancelClear}
+          >
+            {i18n.editor.clearLayerPrompt}
+          </ConfirmationDialog>
+          <CopyFromDialog
+            open={this.state.copyFromOpen}
+            onCopy={this.copyFromLayer}
+            onCancel={this.cancelCopyFrom}
+            layers={copyFromLayerOptions}
+            currentLayer={currentLayer}
+          />
+          <ImportExportDialog
+            open={this.state.importExportDialogOpen}
+            keymap={layerData}
+            palette={this.state.palette}
+            colormap={this.state.colorMap[this.state.currentLayer]}
+            isReadOnly={isReadOnly}
+            onConfirm={this.importLayer}
+            onCancel={this.cancelImport}
+            toCloseImportExportDialog={this.toCloseImportExportDialog}
+          />
+        </Container>
+      </Styles>
     );
   }
 }
 
-Editor.propTypes = {
-  classes: PropTypes.object.isRequired
-};
-
-export default withSnackbar(withStyles(styles, { withTheme: true })(Editor));
+export default Editor;

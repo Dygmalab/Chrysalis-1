@@ -30,11 +30,11 @@ export default class Colormap {
   }
 
   setLayerSize(opts) {
-    if (!opts || opts == undefined) return;
+    if (!opts || opts === undefined) return;
 
-    if (typeof opts == "number") {
+    if (typeof opts === "number") {
       this._layerSize = opts;
-    } else if (typeof opts == "object") {
+    } else if (typeof opts === "object") {
       this._layerSize = opts.keyboardUnderglow
         ? opts.keyboardUnderglow.rows * opts.keyboardUnderglow.columns
         : opts.keyboard.rows * opts.keyboard.columns;
@@ -57,29 +57,29 @@ export default class Colormap {
     let palette = this._chunk(
       paletteData
         .split(" ")
-        .filter(v => v.length > 0)
-        .map(k => parseInt(k)),
+        .filter((v) => v.length > 0)
+        .map((k) => parseInt(k)),
       3
-    ).map(color => {
+    ).map((color) => {
       return {
         r: color[0],
         g: color[1],
         b: color[2],
-        rgb: `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+        rgb: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
       };
     });
 
     let colorMap = this._chunk(
       colorMapData
         .split(" ")
-        .filter(v => v.length > 0)
-        .map(k => parseInt(k)),
+        .filter((v) => v.length > 0)
+        .map((k) => parseInt(k)),
       this._layerSize
     );
 
     return {
       palette: palette,
-      colorMap: colorMap
+      colorMap: colorMap,
     };
   }
 
@@ -89,14 +89,14 @@ export default class Colormap {
 
   async _updatePalette(s, palette) {
     let args = this._flatten(
-      palette.map(color => [color.r, color.g, color.b])
-    ).map(v => v.toString());
+      palette.map((color) => [color.r, color.g, color.b])
+    ).map((v) => v.toString());
 
     return await s.request("palette", ...args);
   }
 
   async _updateColormap(s, colormap) {
-    let args = this._flatten(colormap).map(v => v.toString());
+    let args = this._flatten(colormap).map((v) => v.toString());
     return await s.request("colormap.map", ...args);
   }
 

@@ -23,8 +23,8 @@ const English = {
   components: {
     layer: "Layer {0}",
     save: {
-      success: "Sent!",
-      saveChanges: "Send changes to the Raise"
+      success: "Saved!",
+      saveChanges: "Save Changes"
     },
     pickerColorButton: "Change color",
     underglowColorButton: "Change color of all underglows",
@@ -39,6 +39,7 @@ const English = {
     menu: {
       comingSoon: "Coming soon...",
       welcome: "Welcome",
+      userMenu: "User Menu",
       editor: "Layout & colormap editor",
       firmwareUpdate: "Firmware Update",
       keyboardSettings: "Keyboard Settings",
@@ -97,11 +98,11 @@ const English = {
       Blank: "Blank",
       "Unknown keycodes": "Unknown keycodes"
     },
-    clearLayer: "Clear layer",
+    clearLayer: "Clear layer...",
     clearLayerQuestion: "Clear layer?",
     clearLayerPrompt: "This will reset the layer to its default state.",
-    copyFrom: "Copy from layer",
-    pleaseSelectLayer: "Please select a layer",
+    copyFrom: "Copy from layer...",
+    pleaseSelectLayer: "Please select a layer...",
     dualUse: "Modifier when held, normal key otherwise",
     dualUseLayer: "Layer shift when held, normal key otherwise",
     layoutMode: "Edit the keyboard layout",
@@ -149,17 +150,6 @@ const English = {
         oneHour: "1 hour"
       }
     },
-    colorSettings: {
-      title: "White Balance",
-      visualizebutton: "VISUALIZE CHANGES",
-      test: {
-        quit: "Quit Test Mode",
-        enter: "Enter Test Mode"
-      },
-      red: "Red Color",
-      green: "Green Color",
-      blue: "Blue Color"
-    },
     advancedOps: "Advanced keyboard settings & operations",
     resetEEPROM: {
       button: "Reset EEPROM to factory defaults",
@@ -187,7 +177,7 @@ const English = {
       error: "Error flashing the firmware",
       troubleshooting: "Troubleshooting",
       success: "Firmware flashed successfully!",
-      button: "Next",
+      button: "Update",
       buttonSuccess: "Updated!"
     },
     defaultFirmware: "Bazecor {0} default",
@@ -196,13 +186,10 @@ const English = {
     experimentalFirmwareDescription: "Experimental, with more plugins enabled",
     selected: "Selected firmware",
     custom: "Custom firmware",
-    description: `To install new features in your Raise we need to update the firmware. By clicking on the Update button, Bazecor will install a new version of your keyboard's firmware. This will overwrite your previous firmware.
-
-To correctly update the firmware, your Raise has to be on LED Rainbow mode.
-
-You can find the LED Rainbow mode with the "LED Next" key. In the default Dygma layout, you can find it by pressing the right Dygma key.`,
+    description: `Updating or "flashing" your keyboard's firmware is how we teach it new tricks. Bazecor will install a new version of your keyboard's firmware which includes support for customizing the key layout, as well as other features. If you've previously customized your keyboard's firmware, this will overwrite your custom firmware. You can always find the source code of the firmware Bazecor is installing here:`,
+    postUpload: `Once the upload is done, Bazecor will take you back to the keyboard selection screen.`,
     raise: {
-      reset: `Firmware Update Process`
+      reset: `Reset message`
     }
   },
   welcome: {

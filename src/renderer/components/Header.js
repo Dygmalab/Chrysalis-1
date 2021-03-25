@@ -15,132 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from "react";
+import React, { Component } from 'react';
 
-import "../../api/keymap";
-import "../../api/colormap";
-import "typeface-roboto/index.css";
-import "typeface-source-code-pro/index.css";
+import MainMenu from './MainMenu/MainMenu';
 
-import AppBar from "@material-ui/core/AppBar";
-import Button from "@material-ui/core/Button";
-import CloseIcon from "@material-ui/icons/Close";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
-import menu from "../menu.png";
-import menuWhite from "../menu-white.png";
+class Header extends Component {
+  constructor(props) {
+    super(props);
 
-import BoardMenu from "./BoardMenu";
-import MainMenu from "./MainMenu/MainMenu";
-
-const styles = theme => ({
-  pageMenu: {
-    marginLeft: theme.spacing.unit * 5,
-    textTransform: "uppercase"
-  },
-  menuButton: {
-    marginLeft: 22,
-    marginRight: 20
-  },
-  grow: {
-    flexGrow: 1
-  },
-  navigation: {
-    display: "flex",
-    alignItems: "start",
-    flexDirection: "column"
-  },
-  logo: {
-    width: 17,
-    height: 17,
-    marginRight: 10
-  },
-  submenu: {
-    display: "flex",
-    alignItems: "center",
-    margin: "0 0 0 15px",
-    minHeight: 52
-  },
-  menuIcon: {
-    width: 40
-  }
-});
-
-function Header({
-  classes,
-  contextBar,
-  connected,
-  pages,
-  device,
-  theme,
-  cancelContext
-}) {
-  const [mainMenu, setMainMenuOpen] = useState(false);
-  const [boardAnchor, setBoardMenuAnchor] = useState(null);
-
-  function openMainMenu() {
-    setMainMenuOpen(true);
+    this.state = {
+      mainMenu: true,
+    };
   }
 
-  function closeMainMenu() {
-    setMainMenuOpen(false);
+  closeMainMenu() {
+    this.setState({ mainMenu: false });
   }
 
-  function closeBoardMenu() {
-    setBoardMenuAnchor(null);
-  }
+  render() {
+    const { connected, pages } = this.props;
 
-  function contextOnClick() {
-    if (contextBar) {
-      cancelContext(true);
-    } else {
-      openMainMenu();
-    }
+    return (
+      <MainMenu
+        connected={connected}
+        pages={pages}
+        open={this.mainMenu}
+        closeMenu={this.closeMainMenu}
+      />
+    );
   }
-
-  return (
-    <AppBar
-      position="static"
-      color={contextBar ? "secondary" : "inherit"}
-      id="appbar"
-      style={{ padding: "20px 0" }}
-    >
-      <Toolbar variant="dense" className={classes.navigation}>
-        <MainMenu
-          connected={connected}
-          pages={pages}
-          open={mainMenu}
-          closeMenu={closeMainMenu}
-          themeDark={theme}
-        />
-        <div className={classes.grow} />
-        {device && device.urls && (
-          <BoardMenu
-            boardAnchor={boardAnchor}
-            boardClose={closeBoardMenu}
-            device={device}
-          />
-        )}
-        <div className={classes.submenu}>
-          <Button onClick={contextOnClick}>
-            {contextBar ? (
-              <CloseIcon />
-            ) : theme ? (
-              <img src={menuWhite} alt="Menu" className={classes.menuIcon} />
-            ) : (
-              <img src={menu} alt="Menu" className={classes.menuIcon} />
-            )}
-          </Button>
-          <Typography
-            variant="h6"
-            className={classes.pageMenu}
-            id="page-title"
-          />
-        </div>
-      </Toolbar>
-    </AppBar>
-  );
 }
 
-export default withStyles(styles)(Header);
+export default Header;

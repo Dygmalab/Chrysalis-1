@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import i18n from "../../i18n";
-import support from "../../support.png";
-import supportWhite from "../../suppport-white.png";
+import React from 'react';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import i18n from '../../i18n';
+import support from '../../support.png';
+import supportWhite from '../../suppport-white.png';
 
 export default function SupportPage({ onClick, className, themeDark }) {
   return (

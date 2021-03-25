@@ -1,3 +1,3 @@
-import KeySelector from "./KeySelector";
+import KeySelector from './KeySelector';
 
 export default KeySelector;

@@ -18,39 +18,14 @@
  * This is Reactjs functional component that create color button
  */
 import React from "react";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import { setButtonSizeTamplate } from "../../../renderer/utils/setTemplates";
-
-ColorButton.propTypes = {
-  classes: PropTypes.object.isRequired,
-  isFocus: PropTypes.bool.isRequired,
-  setIsFocus: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired,
-  color: PropTypes.object.isRequired,
-  disabled: PropTypes.bool.isRequired,
-  isSelected: PropTypes.bool
-};
-
-const styles = () => ({
-  root: {
-    ...setButtonSizeTamplate(35),
-    margin: "4px 6px",
-    padding: 0,
-    borderRadius: 5,
-    cursor: "pointer",
-    boxShadow: "-2px 1px 5px 0px rgba(213,213,213,1)"
-  }
-});
 
 const styleDisabled = {
   background: "rgb(155, 155, 155)",
   pointerEvents: "none",
-  cursor: "default"
+  cursor: "default",
 };
 
-///Minimum value for rendering border on white button
+// /Minimum value for rendering border on white button
 const minWhiteColorValue = 140;
 
 /**
@@ -63,8 +38,8 @@ const minWhiteColorValue = 140;
  * @param {boolean} disabled Property that disable component
  */
 function ColorButton(props) {
-  const { classes, setIsFocus, isFocus, index, color, disabled } = props;
-  ///Checks background is white or not
+  const { setIsFocus, isFocus, index, color, disabled } = props;
+  // /Checks background is white or not
   const isWhiteColor =
     color.r >= minWhiteColorValue &&
     color.g >= minWhiteColorValue &&
@@ -72,26 +47,26 @@ function ColorButton(props) {
 
   const style = {
     background: `rgb(${color.r}, ${color.g}, ${color.b})`,
-    color: !isWhiteColor ? "white" : "black"
+    color: !isWhiteColor ? "white" : "black",
   };
 
   const styleInFocus = {
     ...style,
     boxShadow: !isWhiteColor
       ? `0px 0px 26px 4px rgb(${color.r}, ${color.g}, ${color.b})`
-      : `0px 0px 26px 4px rgb(155, 155, 155)`
+      : `0px 0px 26px 4px rgb(155, 155, 155)`,
   };
 
   return (
-    <Button
+    <button
       variant="contained"
-      className={classes.root}
+      className=""
       style={disabled ? styleDisabled : isFocus ? styleInFocus : style}
       onClick={setIsFocus.bind(this, index, color)}
     >
-      {""}
-    </Button>
+      {" "}
+    </button>
   );
 }
 
-export default withStyles(styles)(ColorButton);
+export default ColorButton;

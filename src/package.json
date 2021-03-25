@@ -1,0 +1,17 @@
+{
+  "name": "BAZECOR",
+  "productName": "Bazecor",
+  "version": "1.0.0",
+  "description": "Dygma Raise configuration tool",
+  "main": "./main.prod.js",
+  "scripts": {
+    "electron-rebuild": "node -r ../.erb/scripts/BabelRegister.js ../.erb/scripts/ElectronRebuild.js",
+    "postinstall": "yarn electron-rebuild"
+  },
+  "dependencies": {
+    "serialport": "^9.0.6",
+    "usb": "^1.6.5",
+    "electron-settings": "^4.0.2",
+    "electron-store": "^7.0.2"
+  }
+}

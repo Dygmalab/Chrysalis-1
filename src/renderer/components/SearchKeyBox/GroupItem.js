@@ -17,28 +17,14 @@
 /**
  * This is Reactjs functional component that change key value on the keyboard layout
  */
-import React from "react";
+import React from 'react';
 
-import { withStyles } from "@material-ui/core/styles";
-import PropTypes from "prop-types";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-import MultipleKeysGroup from "./MultipleKeysGroup";
-
-GroupItem.propTypes = {
-  classes: PropTypes.objectOf(PropTypes.string.isRequired).isRequired,
-  group: PropTypes.shape({
-    displayName: PropTypes.string.isRequired,
-    groupName: PropTypes.string.isRequired,
-    keys: PropTypes.array
-  }).isRequired,
-  keySelect: PropTypes.func.isRequired,
-  selectedKeyCode: PropTypes.number.isRequired,
-  numderContGrids: PropTypes.number.isRequired,
-  numderLgItemsGrids: PropTypes.number.isRequired,
-  numderMdItemsGrids: PropTypes.number.isRequired
-};
+import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
+import MultipleKeysGroup from './MultipleKeysGroup';
 
 const styles = theme => ({
   wrapper: {
@@ -46,37 +32,37 @@ const styles = theme => ({
     marginBottom: 3
   },
   background: {
-    height: "100%",
-    margin: "0 5px",
-    [theme.breakpoints.down("md")]: {
+    height: '100%',
+    margin: '0 5px',
+    [theme.breakpoints.down('md')]: {
       paddingBottom: 8
     }
   },
   root: {
-    display: "flex",
-    justifyСontent: "space-evenly",
-    padding: "0 2px"
+    display: 'flex',
+    justifyСontent: 'space-evenly',
+    padding: '0 2px'
   },
   button: {
     margin: 3,
     padding: 1,
-    minWidth: "50px",
-    width: "90%",
-    borderColor: "#darkgray",
-    fontSize: "0.7rem",
+    minWidth: '50px',
+    width: '90%',
+    borderColor: '#darkgray',
+    fontSize: '0.7rem',
     fontWeight: 900
   },
   paper: {
     padding: theme.spacing.unit,
-    textAlign: "left",
-    color: "black",
+    textAlign: 'left',
+    color: 'black',
     marginBottom: 4,
-    font: "800 15px Arial",
-    backgroundColor: "#c7c4c496"
+    font: '800 15px Arial',
+    backgroundColor: '#c7c4c496'
   }
 });
 
-const isTransparent = key => key === "Transparent";
+const isTransparent = key => key === 'Transparent';
 
 /**
  * Reactjs functional component that create color button
@@ -108,8 +94,8 @@ function GroupItem(props) {
    * @param {number} md Type of md prop
    * @param {number} lg Type of lg prop
    */
-  const keyMap = (group, md, lg) =>
-    group.keys.map(key => {
+  const keyMap = (kgroup, md, lg) =>
+    kgroup.keys.map(key => {
       const {
         code,
         labels: { primary, verbose }
@@ -126,11 +112,11 @@ function GroupItem(props) {
               onClick={() => keySelect(code)}
             >
               <Button
-                variant={code === selectedKeyCode ? "contained" : "outlined"}
-                color={code === selectedKeyCode ? "primary" : null}
+                variant={code === selectedKeyCode ? 'contained' : 'outlined'}
+                color={code === selectedKeyCode ? 'primary' : null}
                 className={classes.button}
               >
-                {primary || (isTransparent(verbose) && "Transp.")}
+                {primary || (isTransparent(verbose) && 'Transp.')}
               </Button>
             </Grid>
           ) : null}
@@ -145,9 +131,9 @@ function GroupItem(props) {
    * @param {number} lg Type of lg prop
    * @param {string} className Class name for grid container
    */
-  const renderKeyMap = (group, md, lg, className) => (
+  const renderKeyMap = (rgroup, md, lg, className) => (
     <Grid container className={className}>
-      {keyMap(group, md, lg)}
+      {keyMap(rgroup, md, lg)}
     </Grid>
   );
 
@@ -164,18 +150,32 @@ function GroupItem(props) {
             classButton={classes.button}
           />
         ) : (
-          <React.Fragment>
+          <>
             {renderKeyMap(
               group,
               numderMdItemsGrids,
               numderLgItemsGrids,
               classes.root
             )}
-          </React.Fragment>
+          </>
         )}
       </Paper>
     </Grid>
   );
 }
+
+GroupItem.propTypes = {
+  classes: PropTypes.objectOf(PropTypes.string.isRequired).isRequired,
+  group: PropTypes.shape({
+    displayName: PropTypes.string.isRequired,
+    groupName: PropTypes.string.isRequired,
+    keys: PropTypes.array
+  }).isRequired,
+  keySelect: PropTypes.func.isRequired,
+  selectedKeyCode: PropTypes.number.isRequired,
+  numderContGrids: PropTypes.number.isRequired,
+  numderLgItemsGrids: PropTypes.number.isRequired,
+  numderMdItemsGrids: PropTypes.number.isRequired
+};
 
 export default React.memo(withStyles(styles)(GroupItem));

@@ -14,18 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from "react";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
-
-MouseGroup.propTypes = {
-  classes: PropTypes.object.isRequired,
-  group: PropTypes.object.isRequired,
-  renderKeyMap: PropTypes.func.isRequired,
-  classButton: PropTypes.string.isRequired
-};
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 
 const styles = () => ({
   itemName: {
@@ -46,7 +39,7 @@ const styles = () => ({
 function MouseGroup(props) {
   const { group, classes, renderKeyMap, classButton } = props;
   return (
-    <React.Fragment>
+    <>
       <Grid item xs={2} md={4} className={classes.itemName}>
         <Button
           variant="contained"
@@ -55,15 +48,20 @@ function MouseGroup(props) {
           className={classButton}
         >
           {group.groupName
-            .slice(group.groupName.indexOf(" ") - group.groupName.length)
+            .slice(group.groupName.indexOf(' ') - group.groupName.length)
             .toUpperCase()}
         </Button>
       </Grid>
       <Grid item xs={10} md={8} className={classes.itemKeys}>
         {renderKeyMap(group, 4, 3)}
       </Grid>
-    </React.Fragment>
+    </>
   );
 }
+
+MouseGroup.propTypes = {
+  renderKeyMap: PropTypes.func.isRequired,
+  classButton: PropTypes.string.isRequired
+};
 
 export default withStyles(styles)(MouseGroup);

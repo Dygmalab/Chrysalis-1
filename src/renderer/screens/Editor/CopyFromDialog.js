@@ -17,52 +17,42 @@
 
 import React, { useState } from "react";
 
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import Typography from "@material-ui/core/Typography";
-
 import i18n from "../../i18n";
 
-export const CopyFromDialog = props => {
+const CopyFromDialog = (props) => {
   const [selectedLayer, setSelectedLayer] = useState(-1);
   return (
-    <Dialog
+    <dialog
       disableBackdropClick
       open={props.open}
       onClose={props.onCancel}
       fullWidth
     >
-      <DialogTitle>{i18n.editor.copyFrom}</DialogTitle>
-      <DialogContent>
-        <Typography variant="body1" gutterBottom>
+      <dialogTitle>{i18n.editor.copyFrom}</dialogTitle>
+      <dialogContent>
+        <typography variant="body1" gutterBottom>
           {i18n.editor.pleaseSelectLayer}
-        </Typography>
-        <List>
-          {props.layers.map(layer => {
+        </typography>
+        <list>
+          {props.layers.map((layer) => {
             return (
-              <ListItem
+              <listItem
                 key={layer.index}
                 button
-                disabled={layer.index == props.currentLayer}
-                selected={layer.index == selectedLayer}
+                disabled={layer.index === props.currentLayer}
+                selected={layer.index === selectedLayer}
                 onClick={() => {
                   setSelectedLayer(layer.index);
                 }}
               >
-                <ListItemText inset primary={layer.label} />
-              </ListItem>
+                <listItemText inset primary={layer.label} />
+              </listItem>
             );
           })}
-        </List>
-      </DialogContent>
-      <DialogActions>
-        <Button
+        </list>
+      </dialogContent>
+      <dialogActions>
+        <button
           color="primary"
           onClick={() => {
             setSelectedLayer(-1);
@@ -70,19 +60,21 @@ export const CopyFromDialog = props => {
           }}
         >
           {i18n.dialog.cancel}
-        </Button>
-        <Button
+        </button>
+        <button
           onClick={() => {
             const layer = selectedLayer;
             setSelectedLayer(-1);
             props.onCopy(layer);
           }}
           color="primary"
-          disabled={selectedLayer == -1}
+          disabled={selectedLayer === -1}
         >
           {i18n.dialog.ok}
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </button>
+      </dialogActions>
+    </dialog>
   );
 };
+
+export default CopyFromDialog;

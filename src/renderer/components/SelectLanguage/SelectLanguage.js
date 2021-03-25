@@ -15,42 +15,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import path from "path";
-import { withStyles } from "@material-ui/core/styles";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import path from 'path';
+import { withStyles } from '@material-ui/core/styles';
 // languagesDB is data base, typeof object
-import { languagesDB } from "../../../api/keymap";
-import Button from "@material-ui/core/Button";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import LanguageItem from "./LanguageItem";
-import Popper from "@material-ui/core/Popper";
-import List from "@material-ui/core/List";
-import Divider from "@material-ui/core/Divider";
-import Grid from "@material-ui/core/Grid";
+import Button from '@material-ui/core/Button';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Popper from '@material-ui/core/Popper';
+import List from '@material-ui/core/List';
+import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
+import LanguageItem from './LanguageItem';
+import { languagesDB } from '../../api/keymap';
 
-import Focus from "../../../api/focus";
-import { getStaticPath } from "../../config";
+import Focus from '../../api/focus';
+import { getStaticPath } from '../../config';
 
 const styles = theme => ({
   root: {
-    width: "100%",
+    width: '100%',
     maxWidth: 360,
     backgroundColor: theme.palette.background.paper
   },
   button: {
     width: 170,
-    padding: "5px 5px 5px 26px",
-    marginLeft: "30px"
+    padding: '5px 5px 5px 26px',
+    marginLeft: '30px'
   },
   img: {
-    width: "auto",
+    width: 'auto',
     height: 20,
     marginRight: 10
   },
   container: {
-    display: "flex",
-    alignItems: "center"
+    display: 'flex',
+    alignItems: 'center'
   }
 });
 
@@ -65,11 +65,14 @@ const styles = theme => ({
  */
 
 class SelectLanguage extends Component {
-  state = {
-    anchorEl: null
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      anchorEl: null
+    };
+  }
 
-  isDevelopment = process.env.NODE_ENV !== "production";
+  isDevelopment = process.env.NODE_ENV !== 'production';
 
   handleOpenLanguage = evt => {
     this.setState({
@@ -92,11 +95,11 @@ class SelectLanguage extends Component {
     } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-    let focus = new Focus();
-    const isISO = focus.device && focus.device.info.keyboardType === "ISO";
+    const focus = new Focus();
+    const isISO = focus.device && focus.device.info.keyboardType === 'ISO';
     const childrenItems = item => {
       let name = item;
-      if (item === "english") {
+      if (item === 'english') {
         name = isISO ? `${item}-UK` : `${item}-US`;
       }
       return (
@@ -135,7 +138,7 @@ class SelectLanguage extends Component {
     ));
 
     return (
-      <React.Fragment>
+      <>
         <Button
           variant="contained"
           color="primary"
@@ -155,13 +158,12 @@ class SelectLanguage extends Component {
             </List>
           </ClickAwayListener>
         </Popper>
-      </React.Fragment>
+      </>
     );
   }
 }
 
 SelectLanguage.propTypes = {
-  classes: PropTypes.object.isRequired,
   scanKeyboard: PropTypes.func.isRequired,
   onChangeLanguageLayout: PropTypes.func.isRequired,
   currentLanguageLayout: PropTypes.string.isRequired

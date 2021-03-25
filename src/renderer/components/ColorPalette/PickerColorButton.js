@@ -19,34 +19,7 @@
  */
 import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
-import Fab from "@material-ui/core/Fab";
-import Tooltip from "@material-ui/core/Tooltip";
-import Popover from "@material-ui/core/Popover";
-import PaletteIcon from "@material-ui/icons/Palette";
-import RootRef from "@material-ui/core/RootRef";
-
-PickerColorButton.propTypes = {
-  classes: PropTypes.object.isRequired,
-  setColorFocusButton: PropTypes.func.isRequired,
-  colorFocusButton: PropTypes.object,
-  disabled: PropTypes.bool.isRequired
-};
-
-const styles = {
-  root: {
-    textAlign: "center",
-    margin: "15px 0"
-  },
-  fab: {
-    width: 70,
-    height: 70
-  },
-  icon: {
-    fontSize: 32
-  }
-};
 
 /**
  * Reactjs functional component that create button to choose colors from Color Picker
@@ -56,12 +29,7 @@ const styles = {
  * @param {boolean} disabled Property that disable component
  */
 function PickerColorButton(props) {
-  const {
-    classes,
-    setColorFocusButton,
-    colorFocusButton: color,
-    disabled
-  } = props;
+  const { setColorFocusButton, colorFocusButton: color, disabled } = props;
 
   /**
    * This is Hook that lets add React state "anchorEl" to functional components
@@ -73,7 +41,7 @@ function PickerColorButton(props) {
   /**
    * Change "anchorEl" in functional component state to open Color Picker
    */
-  const handleClick = e => {
+  const handleClick = (e) => {
     setAnchorEl(e.currentTarget);
   };
 
@@ -83,45 +51,50 @@ function PickerColorButton(props) {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  /// Set the value to open (close) Popover element
+  // / Set the value to open (close) Popover element
   const open = Boolean(anchorEl);
   return (
-    <Tooltip placement="top" title={props.children}>
-      <div className={classes.root}>
-        <RootRef rootRef={underGlowButtonOpen}>
-          <Fab
+    <tooltip placement="top" title={props.children}>
+      <div className="">
+        <rootRef rootRef={underGlowButtonOpen}>
+          <fab
             color="primary"
-            className={classes.fab}
+            className=""
             onClick={handleClick}
             disabled={disabled}
           >
-            <PaletteIcon className={classes.icon} />
-          </Fab>
-        </RootRef>
-        <Popover
-          id={"simple-popover"}
+            <paletteIcon className="" />
+          </fab>
+        </rootRef>
+        <popover
+          id="simple-popover"
           open={open}
           anchorEl={anchorEl}
           onClose={handleClose}
           anchorOrigin={{
             vertical: "top",
-            horizontal: "left"
+            horizontal: "left",
           }}
           transformOrigin={{
             vertical: "bottom",
-            horizontal: "right"
+            horizontal: "right",
           }}
         >
           <SketchPicker
             color={color}
-            onChange={color => {
-              setColorFocusButton(color.rgb);
+            onChange={(lcolor) => {
+              setColorFocusButton(lcolor.rgb);
             }}
           />
-        </Popover>
+        </popover>
       </div>
-    </Tooltip>
+    </tooltip>
   );
 }
 
-export default withStyles(styles)(PickerColorButton);
+PickerColorButton.propTypes = {
+  setColorFocusButton: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired,
+};
+
+export default PickerColorButton;

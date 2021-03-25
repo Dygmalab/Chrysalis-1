@@ -37,7 +37,7 @@ const led_map = [
     3 + LEDS_LEFT_KEYS,
     2 + LEDS_LEFT_KEYS,
     1 + LEDS_LEFT_KEYS,
-    0 + LEDS_LEFT_KEYS
+    0 + LEDS_LEFT_KEYS,
   ],
   [
     7,
@@ -55,7 +55,7 @@ const led_map = [
     10 + LEDS_LEFT_KEYS,
     9 + LEDS_LEFT_KEYS,
     8 + LEDS_LEFT_KEYS,
-    7 + LEDS_LEFT_KEYS
+    7 + LEDS_LEFT_KEYS,
   ],
   [
     13,
@@ -73,7 +73,7 @@ const led_map = [
     18 + LEDS_LEFT_KEYS,
     17 + LEDS_LEFT_KEYS,
     16 + LEDS_LEFT_KEYS,
-    15 + LEDS_LEFT_KEYS
+    15 + LEDS_LEFT_KEYS,
   ],
   [
     19,
@@ -91,7 +91,7 @@ const led_map = [
     25 + LEDS_LEFT_KEYS,
     24 + LEDS_LEFT_KEYS,
     23 + LEDS_LEFT_KEYS,
-    22 + LEDS_LEFT_KEYS
+    22 + LEDS_LEFT_KEYS,
   ],
   [
     26,
@@ -109,19 +109,19 @@ const led_map = [
     31 + LEDS_LEFT_KEYS,
     30 + LEDS_LEFT_KEYS,
     29 + LEDS_LEFT_KEYS,
-    28 + LEDS_LEFT_KEYS
-  ]
+    28 + LEDS_LEFT_KEYS,
+  ],
 ];
 
 const no_key_led_map = [
-  ...Array.apply(0, Array(63)).map((_, i) => i + UNDERGLOW)
+  ...Array.apply(0, Array(63)).map((_, i) => i + UNDERGLOW),
 ];
 
 class KeymapISO extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      underglowIndex: null
+      underglowIndex: null,
     };
   }
 
@@ -133,7 +133,7 @@ class KeymapISO extends React.Component {
         .fill()
         .map(() => 0);
 
-    const getContrastText = color => {
+    const getContrastText = (color) => {
       return this.props.theme
         ? this.props.theme.palette.getContrastText(color)
         : null;
@@ -149,8 +149,8 @@ class KeymapISO extends React.Component {
     let isSelected = (row, col) => {
       const selectIndex = keyIndex(row, col);
       return underglowIndex
-        ? underglowIndex == selectIndex
-        : this.props.selectedKey == selectIndex;
+        ? underglowIndex === selectIndex
+        : this.props.selectedKey === selectIndex;
     };
 
     let stroke = (row, col) => (isSelected(row, col) ? "#202020" : "#b3b3b3");
@@ -168,7 +168,7 @@ class KeymapISO extends React.Component {
         : Array(16)
             .fill()
             .map(() => ({
-              rgb: "#ffffff"
+              rgb: "#ffffff",
             }));
 
     let getColor = (row, col) => {
@@ -187,7 +187,7 @@ class KeymapISO extends React.Component {
         : no_key_led_map[row - UNDERGLOW];
     };
 
-    const onClick = e => {
+    const onClick = (e) => {
       this.setState({ underglowIndex: null });
       this.props.onKeySelect(e);
     };
@@ -206,7 +206,7 @@ class KeymapISO extends React.Component {
      * @props {string} class - className of the button
      * @props {string} textLength length of the text if the button is small and additional text is longer then button
      */
-    const GetCurrentKeyElement = props => {
+    const GetCurrentKeyElement = (props) => {
       return (
         <tspan>
           <tspan
@@ -358,7 +358,7 @@ class KeymapISO extends React.Component {
       "OSL",
       "Mouse",
       "M.Wheel",
-      "M.Warp"
+      "M.Warp",
     ];
     const topsArrTransfer = ["SHIFTTO", "LockTo"];
     const getCenterExtra = (row, col, xCord, yCord, smallKey = false) =>
@@ -374,9 +374,7 @@ class KeymapISO extends React.Component {
               smallKey
             )
         : getLabel(row, col).extraLabel ===
-          getLabel(row, col)
-            .extraLabel.toLowerCase()
-            .endsWith("to")
+          getLabel(row, col).extraLabel.toLowerCase().endsWith("to")
         ? getLabel(row, col).extraLabel &&
           getDivideKeys(getLabel(row, col).extraLabel, xCord, yCord, smallKey)
         : getLabel(row, col).extraLabel;
@@ -442,7 +440,7 @@ class KeymapISO extends React.Component {
         <g id="keyshapes">
           <path
             id="neuron_led"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(131, e);
             }}
             className="key"
@@ -1358,7 +1356,7 @@ class KeymapISO extends React.Component {
         <g id="Areas">
           <polygon
             id="83_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(83, e);
             }}
             fill={getColor(83)}
@@ -1373,7 +1371,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="84_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(84, e);
             }}
             fill={getColor(84)}
@@ -1392,7 +1390,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="87_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(87, e);
             }}
             fill={getColor(87)}
@@ -1411,7 +1409,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="86_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(86, e);
             }}
             fill={getColor(86)}
@@ -1426,7 +1424,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="85_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(85, e);
             }}
             fill={getColor(85)}
@@ -1440,7 +1438,7 @@ class KeymapISO extends React.Component {
           />
           <polyline
             id="92_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(92, e);
             }}
             fill={getColor(92)}
@@ -1457,7 +1455,7 @@ class KeymapISO extends React.Component {
           />
           <polyline
             id="91_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(91, e);
             }}
             fill={getColor(91)}
@@ -1474,7 +1472,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="90_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(90, e);
             }}
             fill={getColor(90)}
@@ -1488,7 +1486,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="89_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(89, e);
             }}
             fill={getColor(89)}
@@ -1502,7 +1500,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="88_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(88, e);
             }}
             fill={getColor(88)}
@@ -1517,7 +1515,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="96_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(96, e);
             }}
             fill={getColor(96)}
@@ -1532,7 +1530,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="95_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(95, e);
             }}
             fill={getColor(95)}
@@ -1547,7 +1545,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="94_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(94, e);
             }}
             fill={getColor(94)}
@@ -1561,7 +1559,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="93_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(93, e);
             }}
             fill={getColor(93)}
@@ -1575,7 +1573,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="97_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(97, e);
             }}
             fill={getColor(97)}
@@ -1590,7 +1588,7 @@ class KeymapISO extends React.Component {
           />
           <polyline
             id="98_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(98, e);
             }}
             fill={getColor(98)}
@@ -1608,7 +1606,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="69_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(69, e);
             }}
             fill={getColor(69)}
@@ -1623,7 +1621,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="76_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(76, e);
             }}
             fill={getColor(76)}
@@ -1636,7 +1634,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="75_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(75, e);
             }}
             fill={getColor(75)}
@@ -1650,7 +1648,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="74_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(74, e);
             }}
             fill={getColor(74)}
@@ -1664,7 +1662,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="73_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(73, e);
             }}
             fill={getColor(73)}
@@ -1678,7 +1676,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="72_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(72, e);
             }}
             fill={getColor(72)}
@@ -1693,7 +1691,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="71_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(71, e);
             }}
             fill={getColor(71)}
@@ -1711,7 +1709,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="70_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(70, e);
             }}
             fill={getColor(70)}
@@ -1726,7 +1724,7 @@ class KeymapISO extends React.Component {
           />
           <rect
             id="77_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(77, e);
             }}
             fill={getColor(77)}
@@ -1742,7 +1740,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="78_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(78, e);
             }}
             fill={getColor(78)}
@@ -1757,7 +1755,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="79_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(79, e);
             }}
             fill={getColor(79)}
@@ -1772,7 +1770,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="80_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(80, e);
             }}
             fill={getColor(80)}
@@ -1788,7 +1786,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="81_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(81, e);
             }}
             fill={getColor(81)}
@@ -1803,7 +1801,7 @@ class KeymapISO extends React.Component {
           />
           <rect
             id="82_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(82, e);
             }}
             fill={getColor(82)}
@@ -1819,7 +1817,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="112_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(112, e);
             }}
             fill={getColor(112)}
@@ -1834,7 +1832,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="113_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(113, e);
             }}
             fill={getColor(113)}
@@ -1847,7 +1845,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="114_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(114, e);
             }}
             fill={getColor(114)}
@@ -1861,7 +1859,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="116_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(116, e);
             }}
             fill={getColor(116)}
@@ -1875,7 +1873,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="115_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(115, e);
             }}
             fill={getColor(115)}
@@ -1893,7 +1891,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="117_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(117, e);
             }}
             fill={getColor(117)}
@@ -1908,7 +1906,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="118_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(118, e);
             }}
             fill={getColor(118)}
@@ -1926,7 +1924,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="119_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(119, e);
             }}
             fill={getColor(119)}
@@ -1940,7 +1938,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="120_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(120, e);
             }}
             fill={getColor(120)}
@@ -1954,7 +1952,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="121_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(121, e);
             }}
             fill={getColor(121)}
@@ -1967,7 +1965,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="122_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(122, e);
             }}
             fill={getColor(122)}
@@ -1981,7 +1979,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="123_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(123, e);
             }}
             fill={getColor(123)}
@@ -1996,7 +1994,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="124_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(124, e);
             }}
             fill={getColor(124)}
@@ -2013,7 +2011,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="125_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(125, e);
             }}
             fill={getColor(125)}
@@ -2028,7 +2026,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="126_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(126, e);
             }}
             fill={getColor(126)}
@@ -2043,7 +2041,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="127_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(127, e);
             }}
             fill={getColor(127)}
@@ -2059,7 +2057,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="128_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(128, e);
             }}
             fill={getColor(128)}
@@ -2076,7 +2074,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="129_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(129, e);
             }}
             fill={getColor(129)}
@@ -2092,7 +2090,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="130_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(130, e);
             }}
             fill={getColor(130)}
@@ -2106,7 +2104,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="100_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(100, e);
             }}
             fill={getColor(100)}
@@ -2120,7 +2118,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="99_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(99, e);
             }}
             fill={getColor(99)}
@@ -2134,7 +2132,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="101_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(101, e);
             }}
             fill={getColor(101)}
@@ -2151,7 +2149,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="103_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(103, e);
             }}
             fill={getColor(103)}
@@ -2164,7 +2162,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="104_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(104, e);
             }}
             fill={getColor(104)}
@@ -2177,7 +2175,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="105_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(105, e);
             }}
             fill={getColor(105)}
@@ -2190,7 +2188,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="106_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(106, e);
             }}
             fill={getColor(106)}
@@ -2203,7 +2201,7 @@ class KeymapISO extends React.Component {
           />
           <rect
             id="108_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(108, e);
             }}
             fill={getColor(108)}
@@ -2219,7 +2217,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="109_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(109, e);
             }}
             fill={getColor(109)}
@@ -2234,7 +2232,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="110_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(110, e);
             }}
             fill={getColor(110)}
@@ -2251,7 +2249,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="111_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(111, e);
             }}
             fill={getColor(111)}
@@ -2266,7 +2264,7 @@ class KeymapISO extends React.Component {
           />
           <polyline
             id="107_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(107, e);
             }}
             fill={getColor(107)}
@@ -2279,7 +2277,7 @@ class KeymapISO extends React.Component {
           />
           <polygon
             id="102_undeglow"
-            onClick={e => {
+            onClick={(e) => {
               setUndeglowIndex(102, e);
             }}
             fill={getColor(102)}

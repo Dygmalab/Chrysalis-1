@@ -17,22 +17,15 @@
 /**
  * This is Reactjs functional component that change key value on the keyboard layout
  */
-import React from "react";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import MouseGroup from "./MouseGroup";
-
-MultipleKeysGroup.propTypes = {
-  classes: PropTypes.object.isRequired,
-  renderKeyMap: PropTypes.func.isRequired,
-  groups: PropTypes.array.isRequired,
-  classButton: PropTypes.string.isRequired
-};
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import MouseGroup from './MouseGroup';
 
 const styles = () => ({
   container: {
-    padding: "0 2px"
+    padding: '0 2px'
   }
 });
 
@@ -49,7 +42,7 @@ function MultipleKeysGroup(props) {
     <Grid container>
       {groups.map(group => (
         <React.Fragment key={group.groupName}>
-          {group.groupName.includes("Mouse") ? (
+          {group.groupName.includes('Mouse') ? (
             <MouseGroup
               group={group}
               renderKeyMap={renderKeyMap}
@@ -65,5 +58,10 @@ function MultipleKeysGroup(props) {
     </Grid>
   );
 }
+
+MultipleKeysGroup.propTypes = {
+  renderKeyMap: PropTypes.func.isRequired,
+  classButton: PropTypes.string.isRequired
+};
 
 export default withStyles(styles)(MultipleKeysGroup);

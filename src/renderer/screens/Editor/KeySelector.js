@@ -15,29 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-//Import of new component that selects new language layout
-import SelectLanguage from "../../components/SelectLanguage";
-import MacroManager from "../../components/MacroManager";
-import SearchKeyBox from "../../components/SearchKeyBox";
+import React from 'react';
+// Import of new component that selects new language layout
 
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormGroup from "@material-ui/core/FormGroup";
-import Button from "@material-ui/core/Button";
-import Paper from "@material-ui/core/Paper";
-import Switch from "@material-ui/core/Switch";
-import TextField from "@material-ui/core/TextField";
-import List from "@material-ui/core/List";
-import { withStyles } from "@material-ui/core/styles";
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
+import Switch from '@material-ui/core/Switch';
+import TextField from '@material-ui/core/TextField';
+import List from '@material-ui/core/List';
+import { withStyles } from '@material-ui/core/styles';
+import SearchKeyBox from '../../components/SearchKeyBox';
+import SelectLanguage from '../../components/SelectLanguage';
 
-import i18n from "../../i18n";
+import i18n from '../../i18n';
+
+import { baseKeyCodeTable } from '../../api/keymap';
 
 const styles = theme => ({
   root: {
-    display: "flex",
-    position: "fixed",
-    left: 0,
+    display: 'flex',
+    position: 'fixed',
     right: 0,
     bottom: 0,
     height: 150
@@ -48,20 +48,20 @@ const styles = theme => ({
   key: {
     fontFamily: '"Source Code Pro", monospace',
     margin: theme.spacing.unit / 2,
-    padding: "4px 8px",
-    minWidth: "auto",
-    minHeight: "auto",
-    whiteSpace: "nowrap"
+    padding: '4px 8px',
+    minWidth: 'auto',
+    minHeight: 'auto',
+    whiteSpace: 'nowrap'
   },
   keygroup: {
     margin: theme.spacing.unit
   },
   keylist: {
-    display: "flex",
-    flexWrap: "wrap"
+    display: 'flex',
+    flexWrap: 'wrap'
   },
   centered: {
-    textAlign: "center"
+    textAlign: 'center'
   },
   typeSelector: {
     color: theme.palette.primary.main
@@ -70,50 +70,26 @@ const styles = theme => ({
     marginRight: theme.spacing.unit * 4
   },
   checkboxRoot: {
-    padding: "12px 4px 12px 12px"
-  },
-  margin: {
-    display: "flex",
-    justifyContent: "start",
-    margin: "0 0 15px 30px",
-    width: 170,
-    height: 34,
-    borderRadius: 3,
-    padding: 0
-  },
-  marginBottom: {
-    display: "flex",
-    justifyContent: "start",
-    margin: "0 0 7px 30px",
-    width: 170,
-    height: 34,
-    borderRadius: 3,
-    padding: 0
-  },
-  extendedIcon: {
-    marginRight: 20,
-    marginLeft: 10
+    padding: '12px 4px 12px 12px'
   }
 });
-
-import { baseKeyCodeTable } from "../../../api/keymap";
 
 const keyGroups = baseKeyCodeTable
   .map(item => {
     return item.groupName;
   })
-  .concat(["Unknown keycodes"]);
+  .concat(['Unknown keycodes']);
 
 const moddableGroups = [
-  "Letters",
-  "Digits",
-  "Punctuation",
-  "Spacing",
-  "Modifiers",
-  "Navigation",
-  "Fx keys",
-  "Numpad",
-  "Miscellaneous"
+  'Letters',
+  'Digits',
+  'Punctuation',
+  'Spacing',
+  'Modifiers',
+  'Navigation',
+  'Fx keys',
+  'Numpad',
+  'Miscellaneous'
 ];
 
 class KeyGroupCodeUnwrapped extends React.Component {
@@ -142,7 +118,7 @@ class KeyGroupCodeUnwrapped extends React.Component {
   };
 
   onKeyDown = event => {
-    if (event.key == "Enter") {
+    if (event.key === 'Enter') {
       this.props.onKeySelect(event.target.value);
       this.setState({ modified: false });
     }
@@ -177,8 +153,8 @@ const KeyButton = withStyles(styles)(props => {
   return (
     <Button
       className={props.classes.key}
-      color={selected ? "primary" : "default"}
-      variant={selected ? "contained" : "outlined"}
+      color={selected ? 'primary' : 'default'}
+      variant={selected ? 'contained' : 'outlined'}
       onClick={() => onKeySelect(keyInfo.code | mask)}
       disabled={disabled}
     >
@@ -213,21 +189,21 @@ class KeyGroupListUnwrapped extends React.Component {
           case GUI_HELD:
             modifier = 3;
             break;
+          default:
+            break;
         }
 
         const result = ((selectedKey - 49169) % 256) + (modifier << 8) + 49169;
 
-        if (result == selectedKey) {
+        if (result === selectedKey) {
           onKeySelect((selectedKey - 49169) % 256);
         } else {
           onKeySelect(result);
         }
+      } else if (selectedKey & mask) {
+        onKeySelect(selectedKey & ~mask);
       } else {
-        if (selectedKey & mask) {
-          onKeySelect(selectedKey & ~mask);
-        } else {
-          onKeySelect(selectedKey | mask);
-        }
+        onKeySelect(selectedKey | mask);
       }
     };
   };
@@ -253,6 +229,8 @@ class KeyGroupListUnwrapped extends React.Component {
         case 3:
           mask = GUI_HELD;
           break;
+        default:
+          break;
       }
       this.props.onKeySelect(keyCode | mask);
     } else {
@@ -272,6 +250,8 @@ class KeyGroupListUnwrapped extends React.Component {
           break;
         case GUI_HELD:
           modifier = 3;
+          break;
+        default:
           break;
       }
       const result = keyCode + (modifier << 8) + 49169;
@@ -301,14 +281,14 @@ class KeyGroupListUnwrapped extends React.Component {
     if (withModifiers) {
       if (keyCode >= 256 && keyCode <= 8191 && keyCode % 256) {
         keyCode = selectedKey % 256 ? selectedKey % 256 : selectedKey;
-        if (selectedKey != 65535) {
+        if (selectedKey !== 65535) {
           mask = selectedKey - keyCode;
         }
         if (
-          mask == CTRL_HELD ||
-          mask == SHIFT_HELD ||
-          mask == LALT_HELD ||
-          mask == GUI_HELD
+          mask === CTRL_HELD ||
+          mask === SHIFT_HELD ||
+          mask === LALT_HELD ||
+          mask === GUI_HELD
         ) {
           invalidDualUse = false;
         }
@@ -332,6 +312,8 @@ class KeyGroupListUnwrapped extends React.Component {
           case 3:
             mask = GUI_HELD;
             break;
+          default:
+            break;
         }
       }
 
@@ -352,7 +334,7 @@ class KeyGroupListUnwrapped extends React.Component {
                 disabled={disabled}
                 keyInfo={keyInfo}
                 mask={0}
-                selected={layer == index}
+                selected={layer === index}
                 key={index}
                 onKeySelect={onKeySelect}
               />
@@ -369,7 +351,7 @@ class KeyGroupListUnwrapped extends React.Component {
         <div>
           <FormControlLabel
             disabled={
-              disabled || keyCode == 0 || Boolean(mask) || invalidDualUseLayer
+              disabled || keyCode === 0 || Boolean(mask) || invalidDualUseLayer
             }
             className={classes.checkbox}
             control={<Switch />}
@@ -395,7 +377,7 @@ class KeyGroupListUnwrapped extends React.Component {
           key={key.code}
           disabled={disabled}
           keyInfo={key}
-          selected={key.code == keyCode}
+          selected={key.code === keyCode}
           onKeySelect={onKeySelect}
           mask={mask}
         />
@@ -407,7 +389,7 @@ class KeyGroupListUnwrapped extends React.Component {
       modSelector = (
         <FormGroup row>
           <FormControlLabel
-            disabled={disabled || keyCode == 0}
+            disabled={disabled || keyCode === 0}
             className={classes.checkbox}
             control={<Checkbox classes={{ root: classes.checkboxRoot }} />}
             checked={Boolean(mask & CTRL_HELD)}
@@ -415,7 +397,7 @@ class KeyGroupListUnwrapped extends React.Component {
             label="Control"
           />
           <FormControlLabel
-            disabled={disabled || keyCode == 0}
+            disabled={disabled || keyCode === 0}
             className={classes.checkbox}
             control={<Checkbox classes={{ root: classes.checkboxRoot }} />}
             checked={Boolean(mask & SHIFT_HELD)}
@@ -423,7 +405,7 @@ class KeyGroupListUnwrapped extends React.Component {
             label="Shift"
           />
           <FormControlLabel
-            disabled={disabled || keyCode == 0}
+            disabled={disabled || keyCode === 0}
             className={classes.checkbox}
             control={<Checkbox classes={{ root: classes.checkboxRoot }} />}
             checked={Boolean(mask & LALT_HELD)}
@@ -431,7 +413,7 @@ class KeyGroupListUnwrapped extends React.Component {
             label="Alt"
           />
           <FormControlLabel
-            disabled={disabled || keyCode == 0 || dualUseModifier}
+            disabled={disabled || keyCode === 0 || dualUseModifier}
             className={classes.checkbox}
             control={<Checkbox classes={{ root: classes.checkboxRoot }} />}
             checked={Boolean(mask & RALT_HELD)}
@@ -439,7 +421,7 @@ class KeyGroupListUnwrapped extends React.Component {
             label="AltGr"
           />
           <FormControlLabel
-            disabled={disabled || keyCode == 0}
+            disabled={disabled || keyCode === 0}
             className={classes.checkbox}
             control={<Checkbox classes={{ root: classes.checkboxRoot }} />}
             checked={Boolean(mask & GUI_HELD)}
@@ -447,7 +429,7 @@ class KeyGroupListUnwrapped extends React.Component {
             label="Gui"
           />
           <FormControlLabel
-            disabled={disabled || keyCode == 0 || invalidDualUse}
+            disabled={disabled || keyCode === 0 || invalidDualUse}
             className={classes.checkbox}
             control={<Switch />}
             checked={dualUseModifier}
@@ -459,11 +441,11 @@ class KeyGroupListUnwrapped extends React.Component {
     }
 
     return (
-      <React.Fragment>
+      <>
         <div className={classes.keylist}> {keyList} </div>
         {dualUseLayer || modSelector}
         {dualUseLayerSwitch}
-      </React.Fragment>
+      </>
     );
   }
 }
@@ -473,10 +455,10 @@ class KeyGroup extends React.Component {
   render() {
     const { group, keyCode, onKeySelect, ...props } = this.props;
 
-    const groupName = keyGroups[group],
-      withModifiers = moddableGroups.includes(groupName);
+    const groupName = keyGroups[group];
+    const withModifiers = moddableGroups.includes(groupName);
 
-    if (groupName == "Unknown keycodes") {
+    if (groupName === 'Unknown keycodes') {
       return (
         <KeyGroupCode
           group={group}
@@ -499,66 +481,10 @@ class KeyGroup extends React.Component {
   }
 }
 
-class MacroMenu extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      macros: props.macros,
-      selectedMacro: props.keyCode - 24576
-    };
-    this.localMacros = this.localMacros.bind(this);
-    this.changeSelected = this.changeSelected.bind(this);
-    this.updateMacro = this.updateMacro.bind(this);
-  }
-
-  changeSelected(id) {
-    let aux = id;
-    if (aux < 0) {
-      aux = 0;
-    }
-    this.setState({
-      selectedMacro: aux
-    });
-    this.props.onKeySelect(aux + 24576);
-  }
-
-  localMacros(macros) {
-    this.setState({
-      macros
-    });
-    this.props.updateMacros(macros);
-  }
-
-  updateMacro(macros) {
-    this.localMacros(macros);
-  }
-
-  render() {
-    const { maxMacros, keymapDB } = this.props;
-    return (
-      <div style={{ display: "table-caption" }}>
-        <div style={{ display: "inline-flex" }}>
-          <MacroManager
-            macros={this.state.macros}
-            selected={this.state.selectedMacro}
-            maxMacros={maxMacros}
-            updateMacro={this.updateMacro}
-            changeSelected={this.changeSelected}
-            keymapDB={keymapDB}
-          />
-        </div>
-      </div>
-    );
-  }
-}
-const MacroMenuWrapped = withStyles(styles)(MacroMenu);
-
 class KeySelector extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      anchorEl: null,
       selectedGroup: -1,
       actualKeycode: props.currentKeyCode
     };
@@ -571,13 +497,8 @@ class KeySelector extends React.Component {
     });
   };
 
-  onListItemClick = event => {
-    this.setState({ anchorEl: event.currentTarget });
-  };
-
   onMenuItemClick = (_, index) => {
     this.setState({
-      anchorEl: null,
       selectedGroup: index,
       actualKeycode: 0
     });
@@ -588,27 +509,15 @@ class KeySelector extends React.Component {
   };
 
   render() {
-    const {
-      classes,
-      currentKeyCode,
-      disabled,
-      macros,
-      maxMacros,
-      updateMacros,
-      keymapDB,
-      scanKeyboard,
-      doCancelContext,
-      currentLanguageLayout,
-      onChangeLanguageLayout
-    } = this.props;
+    const { classes, currentKeyCode, disabled } = this.props;
     const { selectedGroup, actualKeycode } = this.state;
-    let groupIndex = selectedGroup,
-      keyCode = currentKeyCode;
+    let groupIndex = selectedGroup;
+    let keyCode = currentKeyCode;
 
-    if (groupIndex == -1) {
+    if (groupIndex === -1) {
       // Modified keys
       if (currentKeyCode >= 256 && currentKeyCode <= 8191 && keyCode % 256) {
-        keyCode = keyCode % 256;
+        keyCode %= 256;
       }
       // DualUse, Modifiers
       if (currentKeyCode >= 49169 && currentKeyCode <= 51217) {
@@ -621,8 +530,8 @@ class KeySelector extends React.Component {
 
       groupIndex = keyGroups.length - 1;
       baseKeyCodeTable.forEach((group, index) => {
-        for (let key of group.keys) {
-          if (key.code == keyCode) {
+        for (const key of group.keys) {
+          if (key.code === keyCode) {
             groupIndex = index;
             break;
           }
@@ -630,7 +539,10 @@ class KeySelector extends React.Component {
       });
     }
     return (
-      <Paper className={classes.root}>
+      <Paper
+        className={classes.root}
+        style={{ left: this.props.drawerWidth + 10 }}
+      >
         <List className={classes.type}>
           <SearchKeyBox
             onKeySelect={this.onKeySelect}
@@ -638,34 +550,20 @@ class KeySelector extends React.Component {
             baseKeyCodeTable={baseKeyCodeTable}
           />
           <SelectLanguage
-            scanKeyboard={scanKeyboard}
-            currentLanguageLayout={currentLanguageLayout}
-            onChangeLanguageLayout={onChangeLanguageLayout}
-            doCancelContext={doCancelContext}
+            scanKeyboard={this.props.scanKeyboard}
+            currentLanguageLayout={this.props.currentLanguageLayout}
+            onChangeLanguageLayout={this.props.onChangeLanguageLayout}
+            doCancelContext={this.props.doCancelContext}
           />
         </List>
-        {keyGroups[groupIndex] === "Macros" ? (
-          <div className={classes.keygroup}>
-            <MacroMenuWrapped
-              keyCode={actualKeycode}
-              key={actualKeycode + macros.lenght}
-              onKeySelect={this.onKeySelect}
-              macros={macros}
-              updateMacros={updateMacros}
-              maxMacros={maxMacros}
-              keymapDB={keymapDB}
-            />
-          </div>
-        ) : (
-          <div className={classes.keygroup}>
-            <KeyGroup
-              disabled={disabled}
-              group={groupIndex}
-              keyCode={actualKeycode}
-              onKeySelect={this.onKeySelect}
-            />
-          </div>
-        )}
+        <div className={classes.keygroup}>
+          <KeyGroup
+            disabled={disabled}
+            group={groupIndex}
+            keyCode={actualKeycode}
+            onKeySelect={this.onKeySelect}
+          />
+        </div>
       </Paper>
     );
   }

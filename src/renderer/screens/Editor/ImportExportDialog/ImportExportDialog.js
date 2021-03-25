@@ -15,24 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from "react";
-const { clipboard } = require("electron");
-const fs = require("fs");
+import React, { useState } from 'react';
 
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import TextField from "@material-ui/core/TextField";
-import Typography from "@material-ui/core/Typography";
+import i18n from '../../../i18n';
+import LoadDefaultKeymap from './LoadDefaultKeymap';
+const { remote } = require('electron');
+const { clipboard } = remote.require('electron');
+const fs = remote.require('fs');
 
-import { withSnackbar } from "notistack";
-
-import i18n from "../../../i18n";
-import LoadDefaultKeymap from "./LoadDefaultKeymap";
-
-export const ImportExportDialog = withSnackbar(props => {
+// eslint-disable-next-line import/prefer-default-export
+export const ImportExportDialog = (props) => {
   const { toCloseImportExportDialog } = props;
 
   const [dataState, setData] = useState();
@@ -44,13 +36,13 @@ export const ImportExportDialog = withSnackbar(props => {
   const [isChange, setIsChange] = useState(false);
 
   const data =
-    dataState != undefined
+    dataState !== undefined
       ? dataState
       : JSON.stringify(
           {
             keymap: props.keymap,
             colormap: props.colormap,
-            palette: props.palette
+            palette: props.palette,
           },
           null,
           2
@@ -64,7 +56,7 @@ export const ImportExportDialog = withSnackbar(props => {
       setData(undefined);
       setIsChange(false);
     } catch (e) {
-      props.enqueueSnackbar(e.toString(), { variant: "error" });
+      props.enqueueSnackbar(e.toString(), { variant: 'error' });
     }
   }
 
@@ -74,166 +66,87 @@ export const ImportExportDialog = withSnackbar(props => {
     props.onCancel();
   }
 
-  function copyToClipboard(data) {
-    clipboard.writeText(data);
-    toExport(data);
+  function copyToClipboard(Cdata) {
+    clipboard.writeText(Cdata);
     setIsChange(false);
     props.enqueueSnackbar(i18n.editor.copySuccess, {
-      variant: "success",
-      autoHideDuration: 2000
+      variant: 'success',
+      autoHideDuration: 2000,
     });
   }
 
   function pasteFromClipboard() {
     setData(clipboard.readText());
-    toImport();
     setIsChange(true);
     props.enqueueSnackbar(i18n.editor.pasteSuccess, {
-      variant: "success",
-      autoHideDuration: 2000
+      variant: 'success',
+      autoHideDuration: 2000,
     });
   }
 
   function loadDefault(path) {
-    fs.readFile(path, "utf-8", (err, layoutData) => {
+    fs.readFile(path, 'utf-8', (err, layoutData) => {
       if (err) {
         props.enqueueSnackbar(i18n.editor.pasteSuccess, {
-          variant: "error",
-          autoHideDuration: 2000
+          variant: 'error',
+          autoHideDuration: 2000,
         });
       }
       setData(layoutData);
     });
   }
 
-  function toImport() {
-    let options = {
-      title: "Load Layers file",
-      buttonLabel: "Load Layers",
-      filters: [
-        { name: "Json", extensions: ["json"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
-    };
-    const remote = require("electron").remote;
-    const WIN = remote.getCurrentWindow();
-    remote.dialog
-      .showOpenDialog(WIN, options)
-      .then(resp => {
-        if (!resp.canceled) {
-          console.log(resp.filePaths);
-          let layers;
-          try {
-            layers = require("fs").readFileSync(resp.filePaths[0]);
-            console.log(JSON.parse(layers).keymap[0].label);
-            props.enqueueSnackbar("Imported succesfully", {
-              variant: "success",
-              autoHideDuration: 2000
-            });
-          } catch (e) {
-            console.error(e);
-            props.enqueueSnackbar("Not a valid Layer file", {
-              variant: "error",
-              autoHideDuration: 2000
-            });
-            return;
-          }
-          setData(layers);
-        } else {
-          console.log("user closed SaveDialog");
-        }
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
-  function toExport(data) {
-    let options = {
-      title: "Save Layers file",
-      defaultPath: "Layers.json",
-      buttonLabel: "Save Layers",
-      filters: [
-        { name: "Json", extensions: ["json"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
-    };
-    const remote = require("electron").remote;
-    const WIN = remote.getCurrentWindow();
-    remote.dialog
-      .showSaveDialog(WIN, options)
-      .then(resp => {
-        if (!resp.canceled) {
-          console.log(resp.filePath, data);
-          require("fs").writeFileSync(resp.filePath, data);
-          props.enqueueSnackbar("Export Successful", {
-            variant: "success",
-            autoHideDuration: 2000
-          });
-        } else {
-          console.log("user closed SaveDialog");
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        props.enqueueSnackbar("Error at Exporting: " + err, {
-          variant: "error",
-          autoHideDuration: 2000
-        });
-      });
-  }
-
   return (
-    <Dialog
+    <dialog
       disableBackdropClick
       open={props.open}
       onClose={onCancel}
       fullScreen
     >
-      <DialogTitle>{i18n.editor.importExport}</DialogTitle>
-      <DialogContent>
-        <Typography variant="body1">
+      <dialogTitle>{i18n.editor.importExport}</dialogTitle>
+      <dialogContent>
+        <typography variant="body1">
           {i18n.editor.importExportDescription}
-        </Typography>
+        </typography>
         <div
           style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center"
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
           <LoadDefaultKeymap loadDefault={loadDefault} />
           <div>
-            <Button color="primary" onClick={() => copyToClipboard(data)}>
-              {"Export Layers"}
-            </Button>
-            <Button color="primary" onClick={pasteFromClipboard}>
-              {"Import Layers"}
-            </Button>
+            <button color="primary" onClick={() => copyToClipboard(data)}>
+              {i18n.editor.copyToClipboard}
+            </button>
+            <button color="primary" onClick={pasteFromClipboard}>
+              {i18n.editor.pasteFromClipboard}
+            </button>
           </div>
         </div>
-        <TextField
+        <textField
           disabled={props.isReadOnly}
           multiline
           fullWidth
           value={data}
-          onChange={event => {
+          onChange={(event) => {
             setData(event.target.value);
             setIsChange(true);
           }}
           variant="outlined"
           margin="normal"
         />
-      </DialogContent>
-      <DialogActions>
-        <Button color="primary" onClick={onCancel}>
+      </dialogContent>
+      <dialogActions>
+        <button color="primary" onClick={onCancel}>
           Cancel
-        </Button>
-        <Button color="primary" onClick={onConfirm}>
+        </button>
+        <button color="primary" onClick={onConfirm}>
           Ok
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </button>
+      </dialogActions>
+    </dialog>
   );
-});
+};

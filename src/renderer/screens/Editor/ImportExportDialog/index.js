@@ -15,6 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ImportExportDialog } from "./ImportExportDialog";
+import { ImportExportDialog } from './ImportExportDialog';
 
 export default ImportExportDialog;

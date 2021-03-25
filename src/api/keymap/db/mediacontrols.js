@@ -16,70 +16,86 @@
  */
 
 const MediaControlTable = {
-  groupName: "Media",
+  groupName: 'Media',
   keys: [
     {
       code: 19682,
       labels: {
-        top: "Media",
-        primary: "MUTE"
-      }
+        top: 'Media',
+        primary: 'MUTE',
+      },
     },
     {
       code: 22709,
       labels: {
-        top: "Media",
-        primary: "TRACK+",
-        verbose: "Next track"
-      }
+        top: 'Media',
+        primary: 'TRACK+',
+        verbose: 'Next track',
+      },
     },
     {
       code: 22710,
       labels: {
-        top: "Media",
-        primary: "TRACK-",
-        verbose: "Prev. track"
-      }
+        top: 'Media',
+        primary: 'TRACK-',
+        verbose: 'Prev. track',
+      },
     },
     {
       code: 22711,
       labels: {
-        top: "Media",
-        primary: "STOP"
-      }
+        top: 'Media',
+        primary: 'STOP',
+      },
     },
     {
       code: 22733,
       labels: {
-        top: "Media",
-        primary: "PLAY",
-        verbose: "Play / pause"
-      }
+        top: 'Media',
+        primary: 'PLAY',
+        verbose: 'Play / pause',
+      },
+    },
+    {
+      code: 22735,
+      labels: {
+        top: 'Media',
+        primary: 'COMMAND',
+        verbose: 'Voice Command',
+      },
     },
     {
       code: 23785,
       labels: {
-        top: "Media",
-        primary: "VOL+",
-        verbose: "Volume up"
-      }
+        top: 'Media',
+        primary: 'VOL+',
+        verbose: 'Volume up',
+      },
     },
     {
       code: 23786,
       labels: {
-        top: "Media",
-        primary: "VOL-",
-        verbose: "Volume down"
-      }
+        top: 'Media',
+        primary: 'VOL-',
+        verbose: 'Volume down',
+      },
     },
     {
       code: 22712,
       labels: {
-        top: "Media",
-        primary: "Eject"
-      }
-    }
-  ]
+        top: 'Media',
+        primary: 'Eject',
+      },
+    },
+    {
+      code: 22713,
+      labels: {
+        top: 'Media',
+        primary: 'RANDOM',
+        verbose: 'Random Play',
+      },
+    },
+  ],
 };
 
 export default MediaControlTable;

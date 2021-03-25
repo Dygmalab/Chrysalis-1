@@ -16,32 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
 
-import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
-import Divider from "@material-ui/core/Divider";
-import FilledInput from "@material-ui/core/FilledInput";
-import FormControl from "@material-ui/core/FormControl";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
-import Slider from "@material-ui/lab/Slider";
-import Switch from "@material-ui/core/Switch";
-import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
+import Button from '@material-ui/core/Button';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import Divider from '@material-ui/core/Divider';
+import FilledInput from '@material-ui/core/FilledInput';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import { Slider } from '@material-ui/core';
+import Switch from '@material-ui/core/Switch';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 
-import Focus from "../../../api/focus";
+import settings from 'electron-settings';
+import Focus from '../../api/focus';
 
-import ConfirmationDialog from "../../components/ConfirmationDialog";
-import SaveChangesButton from "../../components/SaveChangesButton";
-import i18n from "../../i18n";
-
-import settings from "electron-settings";
+import ConfirmationDialog from '../../components/ConfirmationDialog';
+import SaveChangesButton from '../../components/SaveChangesButton';
+import i18n from '../../i18n';
 
 const styles = theme => ({
   title: {
@@ -49,17 +47,17 @@ const styles = theme => ({
     marginBottom: theme.spacing.unit
   },
   control: {
-    display: "flex",
+    display: 'flex',
     marginRight: theme.spacing.unit * 2
   },
   group: {
-    display: "block"
+    display: 'block'
   },
   grow: {
     flexGrow: 1
   },
   flex: {
-    display: "flex"
+    display: 'flex'
   },
   select: {
     paddingTop: theme.spacing.unit * 1,
@@ -75,65 +73,56 @@ const styles = theme => ({
     marginTop: theme.spacing.unit * 2
   },
   advanced: {
-    display: "flex",
-    justifyContent: "center",
+    display: 'flex',
+    justifyContent: 'center',
     marginTop: theme.spacing.unit * 4,
-    "& button": {
-      textTransform: "none",
-      "& span svg": {
-        marginLeft: "1.5em"
+    '& button': {
+      textTransform: 'none',
+      '& span svg': {
+        marginLeft: '1.5em'
       }
     }
   }
 });
 
 class KeyboardSettings extends React.Component {
-  state = {
-    keymap: {
-      custom: [],
-      default: [],
-      onlyCustom: false
-    },
-    ledBrightness: 255,
-    ledIdleTimeLimit: 0,
-    defaultLayer: 126,
-    modified: false,
-    showDefaults: false,
-    working: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      keymap: {
+        custom: [],
+        default: [],
+        onlyCustom: false
+      },
+      ledBrightness: 255,
+      ledIdleTimeLimit: 0,
+      defaultLayer: 126,
+      modified: false,
+      showDefaults: false,
+      working: false
+    };
+  }
 
-  delay = ms => new Promise(res => setTimeout(res, ms));
-
-  async componentDidMount() {
+  componentDidMount() {
     const focus = new Focus();
-    focus.command("keymap").then(keymap => {
-      this.setState({ keymap: keymap });
+    focus.command('keymap').then(keymap => {
+      this.setState({ keymap });
     });
-    focus.command("settings.defaultLayer").then(layer => {
-      layer = layer ? parseInt(layer) : 126;
+    focus.command('settings.defaultLayer').then(layer => {
+      layer = layer ? parseInt(layer, 10) : 126;
       this.setState({ defaultLayer: layer <= 126 ? layer : 126 });
     });
-
-    if (process.platform === "darwin") {
-      await this.delay(50);
-    }
-
-    focus.command("led.brightness").then(brightness => {
-      brightness = brightness ? parseInt(brightness) : -1;
+    focus.command('led.brightness').then(brightness => {
+      brightness = brightness ? parseInt(brightness, 10) : -1;
       this.setState({ ledBrightness: brightness });
     });
-
-    if (process.platform === "darwin") {
-      await this.delay(50);
-    }
-
-    focus.command("idleleds.time_limit").then(limit => {
-      limit = limit ? parseInt(limit) : -1;
+    focus.command('idleleds.time_limit').then(limit => {
+      limit = limit ? parseInt(limit, 10) : -1;
       this.setState({ ledIdleTimeLimit: limit });
     });
 
     this.setState({
-      showDefaults: settings.get("keymap.showDefaults")
+      showDefaults: settings.get('keymap.showDefaults')
     });
   }
 
@@ -200,12 +189,12 @@ class KeyboardSettings extends React.Component {
       ledIdleTimeLimit
     } = this.state;
 
-    await focus.command("keymap.onlyCustom", keymap.onlyCustom);
-    await focus.command("settings.defaultLayer", defaultLayer);
-    await focus.command("led.brightness", ledBrightness);
+    await focus.command('keymap.onlyCustom', keymap.onlyCustom);
+    await focus.command('settings.defaultLayer', defaultLayer);
+    await focus.command('led.brightness', ledBrightness);
     if (ledIdleTimeLimit >= 0)
-      await focus.command("idleleds.time_limit", ledIdleTimeLimit);
-    settings.set("keymap.showDefaults", showDefaults);
+      await focus.command('idleleds.time_limit', ledIdleTimeLimit);
+    settings.set('keymap.showDefaults', showDefaults);
     this.setState({ modified: false });
     this.props.cancelContext();
   };
@@ -323,7 +312,7 @@ class KeyboardSettings extends React.Component {
     );
 
     return (
-      <React.Fragment>
+      <>
         {this.state.working && <LinearProgress variant="query" />}
         <Typography
           variant="subtitle1"
@@ -390,19 +379,18 @@ class KeyboardSettings extends React.Component {
             </SaveChangesButton>
           </CardActions>
         </Card>
-      </React.Fragment>
+      </>
     );
   }
 }
 
-KeyboardSettings.propTypes = {
-  classes: PropTypes.object.isRequired
-};
-
 class AdvancedKeyboardSettings extends React.Component {
-  state = {
-    EEPROMClearConfirmationOpen: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      EEPROMClearConfirmationOpen: false
+    };
+  }
 
   clearEEPROM = async () => {
     const focus = new Focus();
@@ -410,18 +398,20 @@ class AdvancedKeyboardSettings extends React.Component {
     await this.setState({ working: true });
     this.closeEEPROMClearConfirmation();
 
-    let eeprom = await focus.command("eeprom.contents");
+    let eeprom = await focus.command('eeprom.contents');
     eeprom = eeprom
-      .split(" ")
+      .split(' ')
       .filter(v => v.length > 0)
       .map(() => 255)
-      .join(" ");
-    await focus.command("eeprom.contents", eeprom);
+      .join(' ');
+    await focus.command('eeprom.contents', eeprom);
     this.setState({ working: false });
   };
+
   openEEPROMClearConfirmation = () => {
     this.setState({ EEPROMClearConfirmationOpen: true });
   };
+
   closeEEPROMClearConfirmation = () => {
     this.setState({ EEPROMClearConfirmationOpen: false });
   };
@@ -430,7 +420,7 @@ class AdvancedKeyboardSettings extends React.Component {
     const { classes } = this.props;
 
     return (
-      <React.Fragment>
+      <>
         {this.state.working && <LinearProgress variant="query" />}
         <Typography
           variant="subtitle1"
@@ -459,14 +449,10 @@ class AdvancedKeyboardSettings extends React.Component {
         >
           {i18n.keyboardSettings.resetEEPROM.dialogContents}
         </ConfirmationDialog>
-      </React.Fragment>
+      </>
     );
   }
 }
-
-AdvancedKeyboardSettings.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 const StyledKeyboardSettings = withStyles(styles)(KeyboardSettings);
 const StyledAdvancedKeyboardSettings = withStyles(styles)(

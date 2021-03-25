@@ -19,37 +19,12 @@
  */
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
 import ColorButtonsArea from "./ColorButtonsArea";
 import PickerColorButton from "./PickerColorButton";
-import { setColorTamplate } from "../../../renderer/utils/setTemplates";
+import { setColorTamplate } from "../../utils/setTemplates";
 import i18n from "../../i18n";
 import UnderglowButton from "./UnderglowButton";
 import BackLightButton from "./BackLightButton";
-
-ColorPalette.propTypes = {
-  classes: PropTypes.object.isRequired,
-  onColorSelect: PropTypes.func.isRequired,
-  palette: PropTypes.array.isRequired,
-  onColorPick: PropTypes.func.isRequired,
-  disabled: PropTypes.bool.isRequired,
-  selected: PropTypes.any,
-  isColorButtonSelected: PropTypes.bool.isRequired,
-  onColorButtonSelect: PropTypes.func.isRequired,
-  theme: PropTypes.object.isRequired,
-  toChangeAllKeysColor: PropTypes.func.isRequired
-};
-
-const styles = () => ({
-  root: {
-    height: "calc(100vh - 230px)",
-    width: 230,
-    minHeight: 500,
-    minWidth: 140,
-    paddingTop: 5
-  }
-});
 
 /**
  * Reactjs functional component that create palette for change buttons color on keyboard
@@ -68,7 +43,6 @@ const styles = () => ({
  */
 function ColorPalette(props) {
   const {
-    classes,
     onColorSelect,
     palette,
     onColorPick,
@@ -79,7 +53,7 @@ function ColorPalette(props) {
     theme,
     toChangeAllKeysColor,
     onBacklightColorSelect,
-    darkMode
+    darkMode,
   } = props;
 
   /*
@@ -87,9 +61,9 @@ function ColorPalette(props) {
    * used with a negative layer. The proper course of action would be to show
    * the palette, but in a disabled state.
    */
-  if (disabled) {
-    return null;
-  }
+  // if (disabled) {
+  //   return null;
+  // }
 
   /**
    * This is Hook that lets add React state "indexFocusButton" to functional components
@@ -103,12 +77,12 @@ function ColorPalette(props) {
   const [colorFocusButton, setColorFocusButton] = useState(
     selected !== null
       ? {
-          ...palette[selected]
+          ...palette[selected],
         }
       : {
           r: 0,
           g: 0,
-          b: 0
+          b: 0,
         }
   );
   /**
@@ -118,7 +92,7 @@ function ColorPalette(props) {
     setIndexFocusButton(selected);
     if (selected !== null) {
       setColorFocusButton({
-        ...palette[selected]
+        ...palette[selected],
       });
     }
   }, [selected, palette]);
@@ -126,7 +100,7 @@ function ColorPalette(props) {
    * Change "colorFocusButton" and pick color of button from PickerColorButton component in functional component state
    * @param {object} color Object with keys that defining colors using the Red-green-blue-alpha (RGBA) model
    */
-  const toSetColorFocusButton = color => {
+  const toSetColorFocusButton = (color) => {
     onColorPick(indexFocusButton, color.r, color.g, color.b);
     setColorFocusButton(setColorTamplate(color));
   };
@@ -160,10 +134,10 @@ function ColorPalette(props) {
     setIndexFocusButton,
     setColorFocusButton,
     onBacklightColorSelect,
-    darkMode
+    darkMode,
   };
   return (
-    <Paper className={classes.root}>
+    <paper className="">
       <PickerColorButton
         setColorFocusButton={toSetColorFocusButton}
         disabled={disabled || !isColorButtonSelected}
@@ -194,8 +168,17 @@ function ColorPalette(props) {
       >
         {i18n.components.keysColorButton}
       </BackLightButton>
-    </Paper>
+    </paper>
   );
 }
 
-export default withStyles(styles)(ColorPalette);
+ColorPalette.propTypes = {
+  onColorSelect: PropTypes.func.isRequired,
+  onColorPick: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired,
+  isColorButtonSelected: PropTypes.bool.isRequired,
+  onColorButtonSelect: PropTypes.func.isRequired,
+  toChangeAllKeysColor: PropTypes.func.isRequired,
+};
+
+export default ColorPalette;

@@ -14,49 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from "react";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Tooltip from "@material-ui/core/Tooltip";
-import Button from "@material-ui/core/Button";
-import { setButtonSizeTamplate } from "../../../renderer/utils/setTemplates";
-
-UndeglowColorButton.propTypes = {
-  classes: PropTypes.object.isRequired,
-  colorFocusButton: PropTypes.object,
-  indexFocusButton: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.number,
-    PropTypes.oneOf([null])
-  ]),
-  theme: PropTypes.object.isRequired,
-  disabled: PropTypes.bool.isRequired,
-  toChangeAllUnderglowsColor: PropTypes.func.isRequired
-};
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Tooltip from '@material-ui/core/Tooltip';
+import Button from '@material-ui/core/Button';
+import { setButtonSizeTamplate } from '../../utils/setTemplates';
 
 const styles = theme => ({
   root: {
-    height: "100%",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginLeft: 6
   },
   button: {
     ...setButtonSizeTamplate(40),
     margin: 5,
     borderRadius: 5,
-    cursor: "pointer",
-    [theme.breakpoints.down("sm")]: {
+    cursor: 'pointer',
+    [theme.breakpoints.down('sm')]: {
       ...setButtonSizeTamplate(35)
     }
   }
 });
 
 const styleDisabled = {
-  background: "rgb(155, 155, 155)",
-  pointerEvents: "none",
-  cursor: "default"
+  background: 'rgb(155, 155, 155)',
+  pointerEvents: 'none',
+  cursor: 'default'
 };
 
 /**
@@ -81,9 +68,7 @@ function UndeglowColorButton(props) {
   const style = {
     background:
       colorFocusButton !== null &&
-      `rgb(${colorFocusButton.r}, ${colorFocusButton.g}, ${
-        colorFocusButton.b
-      })`,
+      `rgb(${colorFocusButton.r}, ${colorFocusButton.g}, ${colorFocusButton.b})`,
     color:
       colorFocusButton !== null &&
       theme.palette.getContrastText(colorFocusButton.rgb)
@@ -102,11 +87,16 @@ function UndeglowColorButton(props) {
           }
           onClick={toChangeAllUnderglowsColor.bind(this, indexFocusButton)}
         >
-          {"LED"}
+          LED
         </Button>
       </div>
     </Tooltip>
   );
 }
+
+UndeglowColorButton.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+  toChangeAllUnderglowsColor: PropTypes.func.isRequired
+};
 
 export default withStyles(styles)(UndeglowColorButton);

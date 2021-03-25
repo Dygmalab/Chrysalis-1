@@ -14,50 +14,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import { withStyles } from "@material-ui/core/styles";
-import PropTypes from "prop-types";
-import Grid from "@material-ui/core/Grid";
-import Fab from "@material-ui/core/Fab";
-import KeyboardIcon from "@material-ui/icons/Keyboard";
-import CloseIcon from "@material-ui/icons/Close";
-import Modal from "@material-ui/core/Modal";
+import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import Grid from '@material-ui/core/Grid';
+import Fab from '@material-ui/core/Fab';
+import KeyboardIcon from '@material-ui/icons/Keyboard';
+import CloseIcon from '@material-ui/icons/Close';
+import Modal from '@material-ui/core/Modal';
 
-import { KeymapDB } from "../../../api/keymap";
-import GroupItem from "./GroupItem";
+import { KeymapDB } from '../../api/keymap';
+import GroupItem from './GroupItem';
 
 const styles = theme => ({
   modal: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   wrapper: {
-    height: "90vh",
-    width: "90vw",
-    position: "relative"
+    height: '90vh',
+    width: '90vw',
+    position: 'relative'
   },
   root: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#f5f5f5",
-    boxShadow: "0 30px 50px rgba(0, 0, 0, 0.7)",
-    padding: "13px 8px 0",
-    overflowY: "auto",
-    [theme.breakpoints.down("md")]: {
-      overflowY: "scroll"
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#f5f5f5',
+    boxShadow: '0 30px 50px rgba(0, 0, 0, 0.7)',
+    padding: '13px 8px 0',
+    overflowY: 'auto',
+    [theme.breakpoints.down('md')]: {
+      overflowY: 'scroll'
     }
   },
   close: {
-    position: "absolute",
+    position: 'absolute',
     right: -20,
-    cursor: "pointer"
+    cursor: 'pointer'
   },
   margin: {
-    display: "flex",
-    justifyContent: "start",
-    margin: "0 0 15px 30px",
+    display: 'flex',
+    justifyContent: 'start',
+    margin: '0 0 15px 30px',
     width: 170,
     height: 34,
     borderRadius: 3,
@@ -69,38 +69,37 @@ const styles = theme => ({
   }
 });
 
-const disabledGroups = ["Leader", "Space Cadet", "Steno"];
+const disabledGroups = ['Leader', 'Space Cadet', 'Steno'];
 
 const orderArray = [
-  { group: "Letters", isUnite: false, displayName: "Letters" },
-  { group: "Digits & Spacing", isUnite: true, displayName: "Digits & Spacing" },
-  { group: "Fx keys", isUnite: false, displayName: "Fx keys" },
+  { group: 'Letters', isUnite: false, displayName: 'Letters' },
+  { group: 'Digits & Spacing', isUnite: true, displayName: 'Digits & Spacing' },
+  { group: 'Fx keys', isUnite: false, displayName: 'Fx keys' },
   {
-    group: "Punctuation",
+    group: 'Punctuation',
     isUnite: false,
-    displayName: "Punctuation & special letters"
+    displayName: 'Punctuation & special letters'
   },
-  { group: "Navigation", isUnite: false, displayName: "Navigation" },
-  { group: "Numpad", isUnite: false, displayName: "Number pad" },
-  { group: "Modifiers", isUnite: false, displayName: "Modifiers" },
-  { group: "Shift to layer", isUnite: false, displayName: "Shift to layer" },
-  { group: "Move to layer", isUnite: false, displayName: "Move to layer" },
-  { group: "Media", isUnite: false, displayName: "Media" },
-  { group: "Miscellaneous", isUnite: false, displayName: "Miscellaneous" },
+  { group: 'Navigation', isUnite: false, displayName: 'Navigation' },
+  { group: 'Numpad', isUnite: false, displayName: 'Number pad' },
+  { group: 'Modifiers', isUnite: false, displayName: 'Modifiers' },
+  { group: 'Shift to layer', isUnite: false, displayName: 'Shift to layer' },
+  { group: 'Move to layer', isUnite: false, displayName: 'Move to layer' },
+  { group: 'Media', isUnite: false, displayName: 'Media' },
+  { group: 'Miscellaneous', isUnite: false, displayName: 'Miscellaneous' },
   {
-    group: "OneShot modifiers",
+    group: 'OneShot modifiers',
     isUnite: false,
-    displayName: "One shot modifiers"
+    displayName: 'One shot modifiers'
   },
-  { group: "LED Effect", isUnite: false, displayName: "Led effects" },
-  { group: "OneShot layers", isUnite: false, displayName: "One shot layers" },
-  { group: "Blank", isUnite: false, displayName: "Blanks" },
+  { group: 'LED Effect', isUnite: false, displayName: 'Led effects' },
+  { group: 'OneShot layers', isUnite: false, displayName: 'One shot layers' },
+  { group: 'Blank', isUnite: false, displayName: 'Blanks' },
   {
-    group: "Mouse configuration options",
+    group: 'Mouse configuration options',
     isUnite: true,
-    displayName: "Mouse configuration options"
-  },
-  { group: "Macros", isUnite: false, displayName: "Macros" }
+    displayName: 'Mouse configuration options'
+  }
 ];
 
 /**
@@ -112,13 +111,13 @@ const orderArray = [
  */
 
 class SearchKeyBox extends Component {
-  state = {
-    open: false,
-    orderArrayWithKeys: []
-  };
-
-  //import on methods from KeymapDB to update to the valid state of baseKeyCodeTable
-  baseKeyCodeTable = KeymapDB.updateBaseKeyCode();
+  constructor(props) {
+    super(props);
+    this.state = {
+      open: false,
+      orderArrayWithKeys: []
+    };
+  }
 
   componentDidMount() {
     this.setState({
@@ -130,13 +129,16 @@ class SearchKeyBox extends Component {
     return nextState.open !== this.state.open;
   }
 
+  // import on methods from KeymapDB to update to the valid state of baseKeyCodeTable
+  baseKeyCodeTable = KeymapDB.updateBaseKeyCode();
+
   /**
    * Creates array for render keys list
    * The first argument is valid state of baseKeyCodeTable
    */
 
   toOrderArrayWithKeys = baseKeyCodeTable => {
-    let codeTable = baseKeyCodeTable.filter(
+    const codeTable = baseKeyCodeTable.filter(
       item => !disabledGroups.includes(item.groupName)
     );
     return orderArray.map(item =>
@@ -149,14 +151,14 @@ class SearchKeyBox extends Component {
         : {
             groupName: item.group,
             displayName: item.displayName,
-            //Change baseKeyCodeTable from props to local variable
+            // Change baseKeyCodeTable from props to local variable
             innerGroup: codeTable.filter(
               group =>
                 item.group.includes(
-                  group.groupName.slice(0, group.groupName.indexOf(" "))
+                  group.groupName.slice(0, group.groupName.indexOf(' '))
                 ) ||
-                (item.group === "Navigation & Miscellaneous" &&
-                  group.groupName === "Blank")
+                (item.group === 'Navigation & Miscellaneous' &&
+                  group.groupName === 'Blank')
             )
           }
     );
@@ -195,48 +197,21 @@ class SearchKeyBox extends Component {
   render() {
     const { classes, currentKeyCode } = this.props;
     const { open, orderArrayWithKeys } = this.state;
-    const groupeList = orderArrayWithKeys.map((group, index) => {
-      console.log(group.groupName);
-      if (group.groupName !== "Macros") {
-        return (
-          <GroupItem
-            key={group.groupName}
-            group={group}
-            keySelect={this.keySelect}
-            isUnited={Boolean(group.innerGroup)}
-            selectedKeyCode={currentKeyCode}
-            numderContGrids={orderArrayWithKeys.length === index + 1 ? 8 : 4}
-            numderLgItemsGrids={orderArrayWithKeys.length === index + 1 ? 1 : 2}
-            numderMdItemsGrids={orderArrayWithKeys.length === index + 1 ? 2 : 3}
-          />
-        );
-      } else {
-        return (
-          <GroupItem
-            key={group.groupName}
-            group={{
-              groupName: group.groupName,
-              displayName: group.displayName,
-              keys: [
-                {
-                  code: group.keys[0].code,
-                  labels: { primary: "Add Macro" }
-                }
-              ]
-            }}
-            keySelect={this.keySelect}
-            isUnited={Boolean(group.innerGroup)}
-            selectedKeyCode={currentKeyCode}
-            numderContGrids={orderArrayWithKeys.length === index + 1 ? 8 : 4}
-            numderLgItemsGrids={orderArrayWithKeys.length === index + 1 ? 1 : 2}
-            numderMdItemsGrids={orderArrayWithKeys.length === index + 1 ? 2 : 3}
-          />
-        );
-      }
-    });
+    const groupeList = orderArrayWithKeys.map((group, index) => (
+      <GroupItem
+        key={group.groupName}
+        group={group}
+        keySelect={this.keySelect}
+        isUnited={Boolean(group.innerGroup)}
+        selectedKeyCode={currentKeyCode}
+        numderContGrids={orderArrayWithKeys.length === index + 1 ? 8 : 4}
+        numderLgItemsGrids={orderArrayWithKeys.length === index + 1 ? 1 : 2}
+        numderMdItemsGrids={orderArrayWithKeys.length === index + 1 ? 2 : 3}
+      />
+    ));
 
     return (
-      <React.Fragment>
+      <>
         <Fab
           variant="extended"
           color="primary"
@@ -267,7 +242,7 @@ class SearchKeyBox extends Component {
             </Grid>
           </div>
         </Modal>
-      </React.Fragment>
+      </>
     );
   }
 }

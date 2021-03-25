@@ -17,40 +17,30 @@
 /**
  * This is Reactjs functional component that create color button
  */
-import React from "react";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import { setButtonSizeTamplate } from "../../../renderer/utils/setTemplates";
-
-ColorFillButton.propTypes = {
-  classes: PropTypes.object.isRequired,
-  isFocus: PropTypes.bool.isRequired,
-  setIsFocus: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired,
-  color: PropTypes.object.isRequired,
-  disabled: PropTypes.bool.isRequired,
-  isSelected: PropTypes.bool
-};
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import { setButtonSizeTamplate } from '../../utils/setTemplates';
 
 const styles = () => ({
   root: {
     ...setButtonSizeTamplate(25),
-    margin: "0 4px 4px 4px",
+    margin: '0 4px 4px 4px',
     padding: 0,
     borderRadius: 5,
-    cursor: "pointer",
-    boxShadow: "-2px 1px 5px 0px rgba(213,213,213,1)"
+    cursor: 'pointer',
+    boxShadow: '-2px 1px 5px 0px rgba(213,213,213,1)'
   }
 });
 
 const styleDisabled = {
-  background: "rgb(155, 155, 155)",
-  pointerEvents: "none",
-  cursor: "default"
+  background: 'rgb(155, 155, 155)',
+  pointerEvents: 'none',
+  cursor: 'default'
 };
 
-///Minimum value for rendering border on white button
+// /Minimum value for rendering border on white button
 const minWhiteColorValue = 140;
 
 /**
@@ -64,10 +54,11 @@ const minWhiteColorValue = 140;
  */
 function ColorFillButton(props) {
   const { classes, setIsFocus, isFocus, index, color, disabled } = props;
-  ///Checks background is white or not
+  // /Checks background is white or not
   const isWhiteColor =
     color.r >= minWhiteColorValue &&
-    (color.g >= minWhiteColorValue && color.b >= minWhiteColorValue);
+    color.g >= minWhiteColorValue &&
+    color.b >= minWhiteColorValue;
 
   const style = {
     background: `rgb(${color.r}, ${color.g}, ${color.b})`
@@ -85,10 +76,15 @@ function ColorFillButton(props) {
       className={classes.root}
       style={disabled ? styleDisabled : isFocus ? styleInFocus : style}
       onClick={setIsFocus.bind(this, index, color)}
-    >
-      {""}
-    </Button>
+    />
   );
 }
+
+ColorFillButton.propTypes = {
+  isFocus: PropTypes.bool.isRequired,
+  setIsFocus: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
+  disabled: PropTypes.bool.isRequired
+};
 
 export default withStyles(styles)(ColorFillButton);

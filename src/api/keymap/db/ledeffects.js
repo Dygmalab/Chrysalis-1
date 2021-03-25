@@ -22,14 +22,14 @@ const LEDEffectsTable = {
       code: 17152,
       labels: {
         primary: "NEXT",
-        top: "LED"
+        top: "LEDEFF."
       }
     },
     {
       code: 17153,
       labels: {
         primary: "PREV",
-        top: "LED",
+        top: "LEDEFF.",
         verbose: "Previous"
       }
     },
@@ -37,7 +37,7 @@ const LEDEffectsTable = {
       code: 17154,
       labels: {
         primary: "TOGGLE",
-        top: "LED"
+        top: "LEDEFF."
       }
     }
   ]

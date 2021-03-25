@@ -16,59 +16,16 @@
  */
 
 import React from "react";
-
+import { Redirect } from "react-router";
 import Focus from "../../api/focus";
-
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
-import CardHeader from "@material-ui/core/CardHeader";
-import KeyboardIcon from "@material-ui/icons/Keyboard";
-import Portal from "@material-ui/core/Portal";
-import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
-
-import { withSnackbar } from "notistack";
-
 import i18n from "../i18n";
-import { navigate } from "../routerHistory";
-
-const styles = theme => ({
-  root: {
-    display: "flex",
-    justifyContent: "center"
-  },
-  card: {
-    margin: theme.spacing.unit * 4,
-    maxWidth: "60%"
-  },
-  grow: {
-    flexGrow: 1
-  },
-  cardSub: {
-    fontSize: "1rem"
-  }
-});
 
 class Welcome extends React.Component {
-  state = {
-    factoryResetStarted: false
-  };
-
-  startFactoryReset = () => {
-    this.setState({ factoryResetStarted: true });
-  };
-  cancelFactoryReset = () => {
-    this.setState({ factoryResetStarted: false });
-  };
-
   reconnect = async () => {
-    let focus = new Focus();
+    const focus = new Focus();
     const device = {
       path: focus._port.path,
-      device: focus.device
+      device: focus.device,
     };
 
     try {
@@ -79,105 +36,68 @@ class Welcome extends React.Component {
   };
 
   render() {
-    let focus = new Focus();
-    const { classes } = this.props;
-
-    const device = this.props.device.device || focus.device;
+    const focus = new Focus();
+    let device = "";
+    try {
+      device = this.props.device.device || focus.device;
+    } catch {
+      return <Redirect to="/" />;
+    }
 
     const reconnectButton = focus._port && (
-      <Button color="secondary" onClick={this.reconnect}>
+      <button color="secondary" onClick={this.reconnect}>
         {i18n.welcome.reconnect}
-      </Button>
+      </button>
     );
-    // const reconnectText = focus._port && (
-    //   <Typography component="p" gutterBottom>
-    //     {i18n.formatString(
-    //       i18n.welcome.reconnectDescription,
-    //       i18n.welcome.reconnect
-    //     )}
-    //   </Typography>
-    // );
+    const reconnectText = focus._port && (
+      <p component="p" gutterBottom>
+        {i18n.formatString(
+          i18n.welcome.reconnectDescription,
+          i18n.welcome.reconnect
+        )}
+      </p>
+    );
 
     return (
-      <div className={classes.root}>
-        <Portal container={this.props.titleElement}>
-          {i18n.welcome.title}
-        </Portal>
-        <Card className={classes.card}>
-          <CardHeader
+      <div className="">
+        <h2 container={this.props.titleElement}>{i18n.welcome.title}</h2>
+        <card className="">
+          <div
             avatar={
-              <Avatar>
-                <KeyboardIcon />
-              </Avatar>
+              "keyboard" //TODO: Use local imported iconset to place keyboard icon for menu
             }
             title={device.info.displayName}
             subheader={focus._port && focus._port.path}
           />
-          <CardContent>
-            <div style={{ padding: "1rem" }}>
-              <Typography
-                variant="h6"
-                gutterBottom
-                style={{ fontWeight: "500", paddingBottom: "1rem" }}
-              >
-                {"Your Raise is currently on Bootloader Mode"}
-              </Typography>
-              <Typography
-                component="p"
-                gutterBottom
-                className={classes.cardSub}
-              >
-                {
-                  "The LED in your Neuron should be pulsing blue and your Raise keyboard won't type."
-                }
-              </Typography>
-              <Typography
-                component="p"
-                gutterBottom
-                className={classes.cardSub}
-              >
-                <ul style={{ lineHeight: "2rem" }}>
-                  <li>
-                    {
-                      "This process will revert your keyboard's configuration back to factory settings."
-                    }
-                  </li>
-                  <li>
-                    {"Before proceeding, we recommend that you "}
-                    <a href="https://support.dygma.com/hc/en-us/articles/360014262298">
-                      {"export and save your layers"}
-                    </a>
-                    {"."}
-                  </li>
-                  <li>
-                    {
-                      "To exit Bootloader Mode, unplug and replug the USB-C cable to your Neuron."
-                    }
-                  </li>
-                </ul>
-              </Typography>
-            </div>
-          </CardContent>
-          <CardActions>
+          <div>
+            <p component="p" gutterBottom>
+              {i18n.formatString(
+                i18n.welcome.contents,
+                i18n.app.menu.firmwareUpdate
+              )}
+            </p>
+            {reconnectText}
+          </div>
+          <div>
             {reconnectButton}
-            <div className={classes.grow} />
-            <Button
+            <div className="{classes.grow}" />
+            <button
               color="primary"
               variant="outlined"
               onClick={async () => {
-                await navigate("/firmware-update");
+                await Redirect("/firmware-update");
               }}
             >
               {i18n.formatString(
                 i18n.welcome.gotoUpdate,
                 i18n.app.menu.firmwareUpdate
               )}
-            </Button>
-          </CardActions>
-        </Card>
+            </button>
+          </div>
+        </card>
       </div>
     );
   }
 }
 
-export default withSnackbar(withStyles(styles)(Welcome));
+export default Welcome;

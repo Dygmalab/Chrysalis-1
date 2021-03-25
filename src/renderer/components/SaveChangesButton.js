@@ -15,86 +15,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
-import classNames from "classnames";
+import React from 'react';
+import Styled from 'styled-components';
+import Button from 'react-bootstrap/Button';
+import { MdSave, MdCheck, MdRefresh } from 'react-icons/md';
+import i18n from '../i18n';
 
-import CircularProgress from "@material-ui/core/CircularProgress";
-import green from "@material-ui/core/colors/green";
-import Button from "@material-ui/core/Button";
-import Fab from "@material-ui/core/Fab";
-import CheckIcon from "@material-ui/icons/Check";
-import SaveAltIcon from "@material-ui/icons/SaveAlt";
-import Tooltip from "@material-ui/core/Tooltip";
-import { withStyles } from "@material-ui/core/styles";
-
-import i18n from "../i18n";
-
-const styles = theme => ({
-  root: {
-    display: "flex",
-    alignItems: "center"
-  },
-  wrapper: {
-    margin: theme.spacing.unit,
-    position: "relative"
-  },
-  buttonSuccess: {
-    backgroundColor: green[500],
-    "&:hover": {
-      backgroundColor: green[700]
-    }
-  },
-  fabProgress: {
-    color: green[500],
-    position: "absolute",
-    top: -6,
-    left: -6,
-    zIndex: 1
-  },
-  buttonProgress: {
-    color: green[500],
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12
-  },
-  icon: {
-    marginRight: -16,
-    zIndex: 1
-  },
-  disabled: {
-    backgroundColor: "#ddd !important"
-  },
-  fab: {
-    position: "fixed",
-    justifyContent: "flex-end",
-    bottom: 0,
-    right: theme.spacing.unit * 4
+const Styles = Styled.div`
+  .saveBtn{
+    position: absolute;
+    bottom: 15px;
+    margin-left: 20px;
   }
-});
+`;
 
 class SaveChangesButton extends React.Component {
-  state = {
-    inProgress: false,
-    success: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      inProgress: false,
+      success: false,
+    };
+  }
 
   componentWillUnmount() {
     clearTimeout(this.timer);
   }
 
-  handleButtonClick = async event => {
+  handleButtonClick = async (event) => {
     this.setState(
       {
-        inProgress: true
+        inProgress: true,
       },
       async () => {
         await this.props.onClick(event);
         this.setState({
           success: this.props.isBeginUpdate ? !this.props.isBeginUpdate : true,
-          inProgress: false
+          inProgress: false,
         });
         this.timer = setTimeout(() => {
           this.setState({ success: false });
@@ -105,13 +62,10 @@ class SaveChangesButton extends React.Component {
 
   render() {
     const { inProgress, success } = this.state;
-    const { classes, successMessage } = this.props;
-    let buttonClassname = classNames({
-      [classes.buttonSuccess]: success
-    });
+    const { successMessage } = this.props;
 
     const textPart = !this.props.floating && (
-      <div className={classes.wrapper}>
+      <div className="">
         <Button
           variant="contained"
           color="primary"
@@ -126,47 +80,39 @@ class SaveChangesButton extends React.Component {
       </div>
     );
 
-    const icon = this.props.icon || <SaveAltIcon />;
-
-    const OptionalTooltip = props => {
+    const OptionalTooltip = (props) => {
       if (this.props.floating) {
-        return <Tooltip title={this.props.children}>{props.children}</Tooltip>;
+        return <tooltip title={this.props.children}>{props.children}</tooltip>;
       }
       return props.children;
     };
 
     return (
       <OptionalTooltip>
-        <div
-          className={classNames(
-            classes.root,
-            this.props.className,
-            this.props.floating && classes.fab
-          )}
-        >
-          <div className={classNames(classes.wrapper, classes.icon)}>
-            <Fab
+        <Styles>
+          <div className="">
+            <Button
               disabled={inProgress || (this.props.disabled && !success)}
               color="primary"
-              className={buttonClassname}
-              classes={{ disabled: classes.disabled }}
+              className="saveBtn"
               onClick={this.handleButtonClick}
             >
-              {success ? <CheckIcon /> : icon}
-            </Fab>
-            {inProgress && (
-              <CircularProgress size={68} className={classes.fabProgress} />
-            )}
+              {success ? (
+                <MdCheck />
+              ) : (
+                <React.Fragment>
+                  <MdSave size="30px" />
+                  Save Changes
+                </React.Fragment>
+              )}
+            </Button>
+            {inProgress && <MdRefresh size={68} className="" />}
           </div>
           {textPart}
-        </div>
+        </Styles>
       </OptionalTooltip>
     );
   }
 }
 
-SaveChangesButton.propTypes = {
-  classes: PropTypes.object.isRequired
-};
-
-export default withStyles(styles)(SaveChangesButton);
+export default SaveChangesButton;

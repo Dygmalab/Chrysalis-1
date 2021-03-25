@@ -14,62 +14,63 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import settings from "electron-settings";
-import BlankTable from "./db/blanks";
-import LetterTable, { ModifiedLetterTables } from "./db/letters";
-import DigitTable, { ModifiedDigitTables } from "./db/digits";
+import ISO6391 from 'iso-639-1';
+import BlankTable from './db/blanks';
+import LetterTable, { ModifiedLetterTables } from './db/letters';
+import DigitTable, { ModifiedDigitTables } from './db/digits';
 import {
   LockLayerTable,
   ShiftToLayerTable,
-  MoveToLayerTable
-} from "./db/layerswitch";
-import PunctuationTable, { ModifiedPunctuationTables } from "./db/punctuation";
-import SpacingTable, { ModifiedSpacingTables } from "./db/spacing";
+  MoveToLayerTable,
+} from './db/layerswitch';
+import PunctuationTable, { ModifiedPunctuationTables } from './db/punctuation';
+import SpacingTable, { ModifiedSpacingTables } from './db/spacing';
 import ModifiersTable, {
   ModifiedModifiersTables,
-  HyperMehTable
-} from "./db/modifiers";
-import NavigationTable, { ModifiedNavigationTables } from "./db/navigation";
-import LEDEffectsTable from "./db/ledeffects";
-import MacrosTable from "./db/macros";
-import NumpadTable, { ModifiedNumpadTables } from "./db/numpad";
-import FunctionKeyTable, { ModifiedFunctionKeyTables } from "./db/fxs";
+  HyperMehTable,
+} from './db/modifiers';
+import NavigationTable, { ModifiedNavigationTables } from './db/navigation';
+import LEDEffectsTable from './db/ledeffects';
+import NumpadTable, { ModifiedNumpadTables } from './db/numpad';
+import FunctionKeyTable, { ModifiedFunctionKeyTables } from './db/fxs';
 
-import MediaControlTable from "./db/mediacontrols";
+import MediaControlTable from './db/mediacontrols';
 import {
   MouseMovementTable,
   MouseWheelTable,
-  MouseButtonTable
-} from "./db/mousecontrols";
+  MouseButtonTable,
+} from './db/mousecontrols';
 import MiscellaneousTable, {
-  ModifiedMiscellaneousTables
-} from "./db/miscellaneous";
+  ModifiedMiscellaneousTables,
+} from './db/miscellaneous';
 
-import { OneShotModifierTable, OneShotLayerTable } from "./db/oneshot";
-import { DualUseModifierTables, DualUseLayerTables } from "./db/dualuse";
-import LeaderTable from "./db/leader";
-import StenoTable from "./db/steno";
-import SpaceCadetTable from "./db/spacecadet";
+import { OneShotModifierTable, OneShotLayerTable } from './db/oneshot';
+import { DualUseModifierTables, DualUseLayerTables } from './db/dualuse';
+import LeaderTable from './db/leader';
+import StenoTable from './db/steno';
+import SpaceCadetTable from './db/spacecadet';
 
 // Spanish - is an Array of objects of values that have to be modified
-import spanish from "./languages/spanish/spanish";
+import spanish from './languages/spanish/spanish';
 
 // German - is an Array of objects of values that have to be modified
-import german, { germanModifiedTables } from "./languages/german/german";
+import german, { germanModifiedTables } from './languages/german/german';
 
 // French - is an Array of objects of values that have to be modified
-import french, { frenchModifiedTables } from "./languages/french/french";
+import french, { frenchModifiedTables } from './languages/french/french';
 
 // Nordic - is an Array of objects of values that have to be modified
-import nordic, { nordicModifiedTables } from "./languages/nordic/nordic";
+import nordic, { nordicModifiedTables } from './languages/nordic/nordic';
 
 // Japanese - is an Array of objects of values that have to be modified
 import japanese, {
-  japaneseModifiedTables
-} from "./languages/japanese/japanese";
+  japaneseModifiedTables,
+} from './languages/japanese/japanese';
 
 // newLanguageLayout - is a function that modify language layout
-import newLanguageLayout from "./languages/newLanguageLayout";
+import newLanguageLayout from './languages/newLanguageLayout';
+
+const { remote } = require('electron');
 
 const defaultBaseKeyCodeTable = [
   LetterTable,
@@ -87,7 +88,6 @@ const defaultBaseKeyCodeTable = [
   MoveToLayerTable,
 
   LEDEffectsTable,
-  MacrosTable,
   MediaControlTable,
   MouseMovementTable,
   MouseButtonTable,
@@ -99,14 +99,14 @@ const defaultBaseKeyCodeTable = [
   StenoTable,
   SpaceCadetTable,
 
-  BlankTable
+  BlankTable,
 ];
 
 const supportModifiedTables = {
   german: germanModifiedTables,
   french: frenchModifiedTables,
   nordic: nordicModifiedTables,
-  japanese: japaneseModifiedTables
+  japanese: japaneseModifiedTables,
 };
 
 const defaultKeyCodeTable = defaultBaseKeyCodeTable
@@ -125,12 +125,12 @@ const defaultKeyCodeTable = defaultBaseKeyCodeTable
 
 // DataBase of languages
 const languagesDB = {
-  english: "english",
+  english: 'english',
   spanish,
   german,
   french,
   nordic,
-  japanese
+  japanese,
 };
 // Create cache for language layout
 const map = new Map();
@@ -141,12 +141,11 @@ class KeymapDB {
   constructor() {
     this.keymapCodeTable = [];
     //create variable that get language from the local storage
-    this.language = settings.get("keyboard.language");
-
+    this.language = ISO6391.getName(remote.app.getLocale()).toLowerCase();
     //Modify our baseKeyCodeTable, depending on the language selected by the static methods and by inside function newLanguageLayout
     baseKeyCodeTable = KeymapDB.updateBaseKeyCode();
     const keyCodeTableWithModifiers =
-      this.language !== "english" && supportModifiedTables[this.language]
+      this.language !== 'english' && supportModifiedTables[this.language]
         ? defaultKeyCodeTable.concat(supportModifiedTables[this.language])
         : defaultKeyCodeTable;
     //Modify our baseKeyCodeTable, depending on the language selected through function newLanguageLayout
@@ -157,7 +156,6 @@ class KeymapDB {
         languagesDB[this.language]
       )
     );
-    this.allCodes = keyCodeTable;
 
     for (let group of keyCodeTable) {
       for (let key of group.keys) {
@@ -169,8 +167,8 @@ class KeymapDB {
           value = {
             code: key.code,
             labels: {
-              primary: "#" + key.code.toString()
-            }
+              primary: '#' + key.code.toString(),
+            },
           };
         }
 
@@ -192,8 +190,8 @@ class KeymapDB {
       key = {
         code: keyCode,
         labels: {
-          primary: "#" + keyCode.toString()
-        }
+          primary: '#' + keyCode.toString(),
+        },
       };
     }
 
@@ -201,21 +199,8 @@ class KeymapDB {
       keyCode: key.code,
       label: key.labels.primary,
       extraLabel: key.labels.top,
-      verbose: key.labels.verbose
+      verbose: key.labels.verbose,
     };
-  }
-
-  reverse(label) {
-    const answ = this.keymapCodeTable
-      .filter(Boolean)
-      .find(x => x.labels.primary === label);
-    return answ !== undefined ? answ.code : 1;
-  }
-
-  getMap() {
-    return this.keymapCodeTable
-      .filter(Boolean)
-      .filter(x => x.code < 255 && x.code > 0);
   }
 
   serialize(key) {
@@ -223,7 +208,8 @@ class KeymapDB {
   }
 
   static updateBaseKeyCode() {
-    this.language = settings.get("keyboard.language") || "english";
+    this.language =
+      ISO6391.getName(remote.app.getLocale()).toLowerCase() || 'english';
     //Checking language in the cache
     if (map.has(this.language)) {
       //Return language layout from the cache

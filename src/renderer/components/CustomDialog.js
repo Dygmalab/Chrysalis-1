@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import MuiDialogContent from "@material-ui/core/DialogContent";
-import MuiDialogActions from "@material-ui/core/DialogActions";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Typography from "@material-ui/core/Typography";
+import React from 'react';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import MuiDialogContent from '@material-ui/core/DialogContent';
+import MuiDialogActions from '@material-ui/core/DialogActions';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
   closeButton: {
-    position: "absolute",
+    position: 'absolute',
     right: theme.spacing.unit * 2,
     top: theme.spacing.unit * 2
   }
@@ -92,15 +92,11 @@ class CustomDialog extends React.Component {
         <DialogContent>{this.props.children}</DialogContent>
         {this.props.countdown !== null && (
           <DialogActions>
-            {this.props.countdown < 0 ? (
-              <React.Fragment />
-            ) : (
-              <Countdown>{this.props.countdown}</Countdown>
-            )}
+            <Countdown>{this.props.countdown}</Countdown>
             <Countbutton
               onClick={this.props.countdown !== 0 ? this.props.upload : null}
               variant="contained"
-              color={this.props.countdown ? "primary" : "secondary"}
+              color={this.props.countdown ? 'primary' : 'secondary'}
               disabled={this.props.countdown !== 0 ? this.props.disabled : null}
             >
               {this.props.buttonText}

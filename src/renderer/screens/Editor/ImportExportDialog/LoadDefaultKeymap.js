@@ -15,55 +15,55 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from "react";
-import path from "path";
-const fs = require("fs");
+import React, { useState, Fragment } from 'react';
 
-import Focus from "../../../../api/focus";
+import Focus from '../../../../api/focus';
 
-import Button from "@material-ui/core/Button";
-
-import { getStaticPath } from "../../../config";
-import i18n from "../../../i18n";
+import i18n from '../../../i18n';
+const { remote } = require('electron');
+let fs = remote.require('fs');
+let path = remote.require('path');
 
 export default function LoadDefaultKeymap({ loadDefault }) {
-  let focus = new Focus();
+  const focus = new Focus();
   const [device] = useState(focus.device);
 
   const { vendor, product } = device.info;
-  const cVendor = vendor.replace("/", "");
-  const cProduct = product.replace("/", "");
-  const layoutPath = layout =>
-    path.join(getStaticPath(), cVendor, cProduct, `${layout}.json`);
+  const cVendor = vendor.replace('/', '');
+  const cProduct = product.replace('/', '');
+  const layoutPath = (layout) =>
+    // eslint-disable-next-line no-undef
+    path.join(__dirname, cVendor, cProduct, `${layout}.json`);
 
-  const defaultLayouts = ["Qwerty", "Dvorak", "Colemak"];
+  const defaultLayouts = ['Qwerty', 'Dvorak', 'Colemak'];
   const deviceLayouts = [];
 
-  defaultLayouts.map(layout => {
-    const path = layoutPath(layout);
+  defaultLayouts.map((layout) => {
+    const lpath = layoutPath(layout);
     try {
-      fs.accessSync(path);
-      deviceLayouts.push({ name: layout, path });
+      fs.accessSync(lpath);
+      deviceLayouts.push({ name: layout, lpath });
     } catch (err) {
       console.log(`${vendor} ${layout} does not exist`);
     }
+    return 0;
   });
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: 'flex' }}>
       {deviceLayouts.length > 0 && (
-        <React.Fragment>
+        <Fragment>
           <h3>{i18n.editor.loadDefault}</h3>
-          {deviceLayouts.map(({ name, path }, i) => (
-            <Button
+          {deviceLayouts.map(({ name, dpath }, i) => (
+            <button
               key={name + i}
               color="primary"
-              onClick={() => loadDefault(path)}
+              onClick={() => loadDefault(dpath)}
             >
               {name}
-            </Button>
+            </button>
           ))}
-        </React.Fragment>
+        </Fragment>
       )}
     </div>
   );

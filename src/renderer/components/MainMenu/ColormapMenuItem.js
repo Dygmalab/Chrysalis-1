@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import HighlightIcon from "@material-ui/icons/Highlight";
-import i18n from "../../i18n";
+import React from 'react';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import HighlightIcon from '@material-ui/icons/Highlight';
+import i18n from '../../i18n';
 
 export default function ColormapMenuItem({ selected, onClick, className }) {
   return (

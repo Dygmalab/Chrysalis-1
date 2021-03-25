@@ -15,6 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import SearchKeyBox from "./SearchKeyBox.js";
+import SearchKeyBox from './SearchKeyBox';
 
 export default SearchKeyBox;
