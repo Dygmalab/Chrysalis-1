@@ -1,9 +1,9 @@
 // React Component Style for Keyboard configuration Tool
 
 @font-face {
-  font-family: "RobotoCondensed";
-  src: url("../../../assets/styles/fonts/RobotoCondensed-Regular.ttf")
-    format("truetype");
+  font-family: 'RobotoCondensed';
+  src: url('../../../assets/styles/fonts/RobotoCondensed-Regular.ttf')
+    format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -45,7 +45,7 @@ $keySpace: $keyWidth * 6.25;
     margin: 0;
     background-color: white;
     font-size: 1.25rem;
-    font-family: "AktivGrotesk";
+    font-family: 'AktivGrotesk';
   }
   .raisedTitle {
     position: relative;
@@ -61,7 +61,7 @@ $keySpace: $keyWidth * 6.25;
   }
   .simple-keyboard {
     margin-top: 0.1rem;
-    font-family: "RobotoCondensed" !important;
+    font-family: 'RobotoCondensed' !important;
     font-size: 0.8rem;
   }
   .hg-theme-default {
@@ -149,9 +149,9 @@ $keySpace: $keyWidth * 6.25;
 
 .superpowers {
   .hline {
-    width: "95%";
-    justify-self: "center";
-    margin: "0.6rem";
+    width: '95%';
+    justify-self: 'center';
+    margin: '0.6rem';
   }
   .title {
     text-align: center;
