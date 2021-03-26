@@ -15,6 +15,7 @@
  */
 
 import fs from "fs";
+import path from "path";
 import Focus from "../focus";
 import Hardware from "../hardware";
 import { arduino } from "./raiseFlasher/arduino-flasher";
@@ -84,6 +85,7 @@ export default class FlashRaise {
    */
   async backupSettings() {
     let focus = new Focus();
+
     const commands = [
       "hardware.keyscan",
       "led.mode",
@@ -92,7 +94,11 @@ export default class FlashRaise {
       "keymap.onlyCustom",
       "led.theme",
       "palette",
-      "colormap.map"
+      "colormap.map",
+      "macros.map",
+      "settings.defaultLayer",
+      "led.brightness",
+      "idleleds.time_limit"
     ];
     this.backupFileName = `Raise-backup-${this.formatedDate()}.json`;
 
@@ -101,6 +107,12 @@ export default class FlashRaise {
       const errorMessage =
         "Firmware update failed, because the settings could not be saved";
       for (let command of commands) {
+        // Ignore the command if it's not supported
+        if (!focus.isCommandSupported(command)) {
+          this.backupFileData.log.push("Unsupported command " + command);
+          continue;
+        }
+
         let res = await focus.command(command);
         this.backupFileData.backup[command] =
           typeof res === "string" ? res.trim() : res;
@@ -125,14 +137,15 @@ export default class FlashRaise {
    * linux: in directory, where the app is located.
    */
   saveBackupFile() {
-    fs.writeFile(
-      `./${this.backupFileName}`,
-      JSON.stringify(this.backupFileData),
-      err => {
-        if (err) throw err;
-        this.backupFileData.log.push("Backup file is created successfully");
-      }
+    const route = path.join(
+      require("electron").remote.app.getAppPath(),
+      this.backupFileName + ".json"
     );
+    console.log("saving file to: " + route);
+    fs.writeFile(route, JSON.stringify(this.backupFileData), err => {
+      if (err) throw err;
+      this.backupFileData.log.push("Backup file is created successfully");
+    });
   }
 
   /**
@@ -141,20 +154,23 @@ export default class FlashRaise {
    * @returns {promise}
    */
   async resetKeyboard(port) {
+    console.log("reset start", port);
     const errorMessage =
-      "The Raise bootloader wasn't found. Please try again, make sure you press and hold the Escape key when the Neuron light goes out";
+      "The firmware update couldn't start because the Raise Bootloader wasn't found. Please check our Help Center for more details or schedule a video call with us.";
     let timeouts = {
-      dtrToggle: 250, // Time to wait (ms) between toggling DTR
+      dtrToggle: 500, // Time to wait (ms) between toggling DTR
       waitingClose: 2750, // Time to wait for boot loader
-      bootLoaderUp: 2500 // Time to wait for the boot loader to come up
+      bootLoaderUp: process.platform === "darwin" ? 4250 : 2500 // Time to wait for the boot loader to come up
     };
     return new Promise((resolve, reject) => {
       port.update({ baudRate: 1200 }, async () => {
+        console.log("resetting neuron");
         this.backupFileData.log.push("Resetting neuron");
         await this.delay(timeouts.dtrToggle);
         port.set({ dtr: true }, async () => {
-          await this.delay(timeouts.waitingClose);
+          await this.delay(timeouts.dtrToggle);
           port.set({ dtr: false }, async () => {
+            console.log("waiting for bootloader");
             this.backupFileData.log.push("Waiting for bootloader");
             try {
               await this.delay(timeouts.bootLoaderUp);
@@ -216,8 +232,8 @@ export default class FlashRaise {
    * Detects keyboard after firmware of bootloader
    */
   async detectKeyboard() {
-    const timeouts = 2000; //time to wait for keyboard
-    const findTimes = 2;
+    const timeouts = 2500; //time to wait for keyboard
+    const findTimes = 3;
     const errorMessage =
       "The firmware update has failed during the flashing process. Please unplug and replug the keyboard and try again";
     this.backupFileData.log.push("Waiting for keyboard");
@@ -247,19 +263,20 @@ export default class FlashRaise {
    * @param {string} errorMessage - error message if error is.
    */
   async runnerFindKeyboard(findKeyboard, times, errorMessage) {
-    return new Promise(async (resolve, reject) => {
-      if (!times) reject(errorMessage);
-
-      if (await findKeyboard()) {
-        await this.restoreSettings();
-        resolve();
-      } else {
-        this.backupFileData.log.push(
-          `Keyboard didn't detect ${times === 2 ? 1 : 2} time`
-        );
-        await this.runnerFindKeyboard(findKeyboard, times - 1, errorMessage);
-      }
-    });
+    if (!times) {
+      console.error(errorMessage);
+      return false;
+    }
+    if (await findKeyboard()) {
+      await this.restoreSettings();
+      console.log("passed restore iteration");
+      return true;
+    } else {
+      this.backupFileData.log.push(
+        `Keyboard didn't detect ${times === 2 ? 1 : 2} time`
+      );
+      await this.runnerFindKeyboard(findKeyboard, times - 1, errorMessage);
+    }
   }
 
   /**
@@ -268,46 +285,37 @@ export default class FlashRaise {
   async restoreSettings() {
     let focus = new Focus();
     const errorMessage =
-      "Firmware update failed, because the settings could not be restore";
-    return new Promise(async (resolve, reject) => {
-      let backup = this.backupFileData.backup;
-      if (
-        Object.entries(backup).length === 0 &&
-        backup.constructor === Object
-      ) {
-        resolve();
-        return;
-      }
-      try {
-        await focus.open(this.currentPort.path, this.currentPort.device.info);
-        await focus
-          .probe()
-          .then(async () => {
-            const commands = Object.keys(this.backupFileData.backup);
-            for (let command of commands) {
-              await focus
-                .request(
-                  command,
-                  command === "keymap.onlyCustom"
-                    ? +this.backupFileData.backup[command]
-                    : this.backupFileData.backup[command]
-                )
-                .then(() => {
-                  console.log(`${command} set to keyboard`);
-                });
+      "Firmware update failed, because the settings could not be restored";
+    let backup = this.backupFileData.backup;
+    if (Object.entries(backup).length === 0 && backup.constructor === Object) {
+      return;
+    }
+    try {
+      await focus
+        .open(this.currentPort.path, this.currentPort.device.info)
+        .then(async () => {
+          const commands = Object.keys(this.backupFileData.backup);
+          for (let command of commands) {
+            let val = this.backupFileData.backup[command];
+            // Boolean values need to be sent as int
+            if (typeof val === "boolean") {
+              val = +val;
             }
-          })
-          .catch(e => {
-            console.log(e);
-            throw new Error(errorMessage);
-          });
-        this.backupFileData.log.push("Restoring all settings");
-        this.backupFileData.log.push("Firmware update OK");
-        resolve();
-      } catch (e) {
-        this.backupFileData.log.push(`Restore settings: Error: ${e.message}`);
-        reject(e);
-      }
-    });
+            await focus.request(command, val).then(() => {
+              console.log(`${command} set to keyboard`);
+            });
+          }
+        })
+        .catch(e => {
+          console.log(e);
+          throw new Error(errorMessage);
+        });
+      this.backupFileData.log.push("Restoring all settings");
+      this.backupFileData.log.push("Firmware update OK");
+      return true;
+    } catch (e) {
+      this.backupFileData.log.push(`Restore settings: Error: ${e.message}`);
+      return false;
+    }
   }
 }

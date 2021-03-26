@@ -2,15 +2,15 @@ import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/auth";
 
-const config = {
-  apiKey: "AIzaSyDno4RdNnU8K6M7eH3Ho0AlLj_zZoHxx1o",
-  authDomain: "bazecor.firebaseapp.com",
-  databaseURL: "https://bazecor.firebaseio.com",
-  projectId: "bazecor",
-  storageBucket: "bazecor.appspot.com",
-  messagingSenderId: "816684149391",
-  appId: "1:816684149391:web:d29bef1c82a46200581efa",
-};
+// const config = {
+//   apiKey: "a",
+//   authDomain: "bazecor.firebaseapp.com",
+//   databaseURL: "https://bazecor.firebaseio.com",
+//   projectId: "bazecor",
+//   storageBucket: "bazecor.appspot.com",
+//   messagingSenderId: "a",
+//   appId: "a",
+// };
 
 // export const createUserProfileDocument = async (userAuth, additionalData) => {
 //   if (!userAuth) return;
@@ -72,13 +72,13 @@ export const shareLayers = async (layers) => {
   return true;
 };
 
-firebase.initializeApp(config);
+// firebase.initializeApp(config);
 
-export const auth = firebase.auth();
-export const firestore = firebase.firestore();
+// export const auth = firebase.auth();
+// export const firestore = firebase.firestore();
 
-const provider = new firebase.auth.GoogleAuthProvider();
-provider.setCustomParameters({ prompt: "select_account" });
-export const signInWithGoogle = () => auth.signInWithPopup(provider);
+// const provider = new firebase.auth.GoogleAuthProvider();
+// provider.setCustomParameters({ prompt: "select_account" });
+// export const signInWithGoogle = () => auth.signInWithPopup(provider);
 
-export default firebase;
+// export default firebase;

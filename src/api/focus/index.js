@@ -17,6 +17,7 @@
 const { remote } = require('electron');
 let SerialPort = remote.require('SerialPort');
 let Delimiter = remote.require('@serialport/parser-delimiter');
+let { spawn } = remote.require('child_process');
 let fs = remote.require('fs');
 
 global.focus_instance = null;
@@ -26,12 +27,11 @@ class Focus {
     if (!global.focus_instance) {
       global.focus_instance = this;
       this.commands = {
-        help: this._help,
+        help: this._help
       };
       this.timeout = 5000;
       this.debug = false;
     }
-
     return global.focus_instance;
   }
 
@@ -45,13 +45,13 @@ class Focus {
 
     let found_devices = [];
 
-    this.debugLog('focus.find: portList:', portList, 'devices:', devices);
+    this.debugLog("focus.find: portList:", portList, "devices:", devices);
 
     for (let port of portList) {
       for (let device of devices) {
         if (
-          parseInt('0x' + port.productId) === device.usb.productId &&
-          parseInt('0x' + port.vendorId) === device.usb.vendorId
+          parseInt("0x" + port.productId) == device.usb.productId &&
+          parseInt("0x" + port.vendorId) == device.usb.vendorId
         ) {
           let newPort = Object.assign({}, port);
           newPort.device = device;
@@ -60,18 +60,18 @@ class Focus {
       }
     }
 
-    this.debugLog('focus.find: found_devices:', found_devices);
+    this.debugLog("focus.find: found_devices:", found_devices);
 
     return found_devices;
   }
 
   async open(device, info) {
-    if (typeof device === 'string') {
-      if (!info) throw new Error('Device descriptor argument is mandatory');
+    if (typeof device == "string") {
+      if (!info) throw new Error("Device descriptor argument is mandatory");
       this._port = new SerialPort(device);
-    } else if (typeof device === 'object') {
-      if (device.hasOwnProperty('binding')) {
-        if (!info) throw new Error('Device descriptor argument is mandatory');
+    } else if (typeof device == "object") {
+      if (device.hasOwnProperty("binding")) {
+        if (!info) throw new Error("Device descriptor argument is mandatory");
         this._port = device;
       } else {
         let devices = await this.find(device);
@@ -81,33 +81,47 @@ class Focus {
         info = device;
       }
     } else {
-      throw new Error('Invalid argument');
+      throw new Error("Invalid argument");
     }
 
     this.device = info;
-    this.parser = this._port.pipe(new Delimiter({ delimiter: '\r\n' }));
-    this.result = '';
+    this.parser = this._port.pipe(new Delimiter({ delimiter: "\r\n" }));
+    this.result = "";
     this.callbacks = [];
-    this.parser.on('data', (data) => {
-      data = data.toString('utf-8');
-      this.debugLog('focus: incoming data:', data);
+    this.supportedCommands = [];
+    this.parser.on("data", data => {
+      data = data.toString("utf-8");
+      this.debugLog("focus: incoming data:", data);
 
-      if (data === '.') {
+      if (data == ".") {
         let result = this.result,
           resolve = this.callbacks.shift();
 
-        this.result = '';
+        this.result = "";
         if (resolve) {
           resolve(result);
         }
       } else {
-        if (this.result.length === 0) {
+        if (this.result.length == 0) {
           this.result = data;
         } else {
-          this.result += '\r\n' + data;
+          this.result += "\r\n" + data;
         }
       }
     });
+
+    if (process.platform == "darwin") {
+      await spawn("stty", ["-f", this._port.path, "clocal"]);
+    }
+
+    // It's not necessary to retreive the supported commands in bootloader mode
+    if (!this.device.bootloader) {
+      try {
+        this.supportedCommands = await this.command("help");
+      } catch (e) {
+        // Ignore
+      }
+    }
 
     return this._port;
   }
@@ -118,10 +132,11 @@ class Focus {
     }
     this._port = null;
     this.device = null;
+    this.supportedCommands = [];
   }
 
   async isDeviceAccessible(port) {
-    if (process.platform !== 'linux') return true;
+    if (process.platform !== "linux") return true;
 
     try {
       fs.accessSync(port.path, fs.constants.R_OK | fs.constants.W_OK);
@@ -137,26 +152,26 @@ class Focus {
     }
     const supported = await port.device.isDeviceSupported(port);
     this.debugLog(
-      'focus.isDeviceSupported: port=',
+      "focus.isDeviceSupported: port=",
       port,
-      'supported=',
+      "supported=",
       supported
     );
     return supported;
   }
 
-  async probe() {
-    return await this.request('help');
+  isCommandSupported(cmd) {
+    return this.supportedCommands.indexOf(cmd) != -1;
   }
 
   async _write_parts(parts, cb) {
-    if (!parts || parts.length === 0) {
+    if (!parts || parts.length == 0) {
       cb();
       return;
     }
 
     let part = parts.shift();
-    part += ' ';
+    part += " ";
     this._port.write(part);
     this._port.drain(async () => {
       await this._write_parts(parts, cb);
@@ -164,12 +179,12 @@ class Focus {
   }
 
   request(cmd, ...args) {
-    this.debugLog('focus.request:', cmd, ...args);
+    this.debugLog("focus.request:", cmd, ...args);
     return new Promise((resolve, reject) => {
       let timer = setTimeout(() => {
-        reject('Communication timeout');
+        reject("Communication timeout");
       }, this.timeout);
-      this._request(cmd, ...args).then((data) => {
+      this._request(cmd, ...args).then(data => {
         clearTimeout(timer);
         resolve(data);
       });
@@ -177,35 +192,24 @@ class Focus {
   }
 
   async _request(cmd, ...args) {
-    if (!this._port) throw new Error('Device not connected!');
+    if (!this._port) throw "Device not connected!";
 
     let request = cmd;
     if (args && args.length > 0) {
-      request = request + ' ' + args.join(' ');
+      request = request + " " + args.join(" ");
     }
-    request += '\n';
+    request += "\n";
 
-    if (process.platform === 'darwin') {
-      let parts = request.split(' ');
-      return new Promise((resolve) => {
-        setTimeout(async () => {
-          await this._port.flush();
-          this.callbacks.push(resolve);
-          await this._write_parts(parts, () => {});
-        }, 500);
-      });
-    } else {
-      return new Promise((resolve) => {
-        this.callbacks.push(resolve);
-        this._port.write(request);
-      });
-    }
+    return new Promise(resolve => {
+      this.callbacks.push(resolve);
+      this._port.write(request);
+    });
   }
 
   async command(cmd, ...args) {
-    if (typeof this.commands[cmd] === 'function') {
+    if (typeof this.commands[cmd] == "function") {
       return this.commands[cmd](this, ...args);
-    } else if (typeof this.commands[cmd] === 'object') {
+    } else if (typeof this.commands[cmd] == "object") {
       return this.commands[cmd].focus(this, ...args);
     } else {
       return this.request(cmd, ...args);
@@ -231,8 +235,8 @@ class Focus {
   }
 
   async _help(s) {
-    let data = await s.request('help');
-    return data.split(/\r?\n/).filter((v) => v.length > 0);
+    let data = await s.request("help");
+    return data.split(/\r?\n/).filter(v => v.length > 0);
   }
 }
 
