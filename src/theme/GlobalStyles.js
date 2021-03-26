@@ -198,6 +198,13 @@ const GlobalStyles = createGlobalStyle`
     box-shadow: ${({ theme }) => theme.colors.button.boxShadow};
 }
 
+svg text{
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 `;
 
 export default GlobalStyles;
