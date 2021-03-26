@@ -44,6 +44,7 @@ const Style = Styled.div`
   .btngrp{
     width: 80%;
     margin-left 10%;
+    margin-bottom: 12px;
   }
 
   .btns{
@@ -112,9 +113,6 @@ export default class LayerPicker extends Component {
         <Container fluid className="keyboard">
           <Row className="keys">
             <h6>Layer Navigation</h6>
-            <svg className="svgContainer" viewBox="-15 0 160 156">
-              {layers}
-            </svg>
             <ButtonGroup className="btngrp">
               <Button
                 className={`btns ${selected === 0 ? 'active' : ''}`}
@@ -141,6 +139,9 @@ export default class LayerPicker extends Component {
                 One Shot
               </Button>
             </ButtonGroup>
+            <svg className="svgContainer" viewBox="-15 0 160 156">
+              {layers}
+            </svg>
           </Row>
         </Container>
       </Style>

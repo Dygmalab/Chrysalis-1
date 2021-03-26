@@ -29,7 +29,7 @@ const Style = Styled.div`
     position: absolute;
     right: 25px;
     width: 180px;
-    margin-top: 250px;
+    margin-top: 280px;
     padding:0;
     background-color: ${({ theme }) => theme.card.background};
     border-radius: 10px;
@@ -38,7 +38,7 @@ const Style = Styled.div`
       margin: 0px;
       padding: 10px;
       h6{
-        margin-top: 10px;
+        margin-top: 5px;
         font-weight:300;
         color: lightgrey;
       }

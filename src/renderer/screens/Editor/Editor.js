@@ -45,7 +45,6 @@ import Focus from '../../../api/focus';
 // import ColorPalette from "../../components/ColorPalette";
 // import KeySelector from "./KeySelector";
 import LayerPanel from './LayerPanel';
-import ToolBar from '../../components/edit-tool/Toolbar';
 import SaveChangesButton from '../../components/SaveChangesButton';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 import i18n from '../../i18n';
@@ -891,7 +890,6 @@ class Editor extends Component {
           <ToolBar />
         </Slide> */}
           <Row>
-            {/* <ToolBar onKeySelect={this.onKeyChange} /> */}
             <KeyPicker onKeySelect={this.onKeyChange} />
           </Row>
           <SaveChangesButton
